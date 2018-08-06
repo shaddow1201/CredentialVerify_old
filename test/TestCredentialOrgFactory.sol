@@ -9,7 +9,7 @@ contract TestCredentialOrgFactory {
 
     // Test to see if base accounts were added. (base, scc and sfcc)
     function testSelectCredentialOrgCount() public {
-        uint256 orgCount = credentialOrgFactory.selectOrgCount();
+        uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
         uint256 expected = 3;
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
@@ -46,7 +46,7 @@ contract TestCredentialOrgFactory {
     }
     // Test to see if insertion possible.
     function testInsertCredentialOrg() public {
-        uint256 checkVal = credentialOrgFactory.selectOrgCount();
+        uint256 checkVal = uint256(credentialOrgFactory.selectOrgCount());
         uint256 arrayLen = credentialOrgFactory.createCredentialOrg("TestOrg", 0xc4c0Fd9475A6C8D1656aeD27d2582bE2608Eb8c7, "XXXX", "Test School of Dentistry");
         Assert.notEqual(arrayLen, checkVal, "Insert of CredentialOrg Test Successful");
     }

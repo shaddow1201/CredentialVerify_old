@@ -9,14 +9,14 @@ import "./SafeMath.sol";
 
 contract CredentialOrgFactory is Pausable {
 
-    using SafeMath for uint256;
+    using SafeMath32 for uint32;
 
-    mapping(uint => address) orgPositionToAddress;
-    mapping(address => uint) addressToOrgPosition;
+    mapping(uint32 => address) orgPositionToAddress;
+    mapping(address => uint32) addressToOrgPosition;
     
     event NewOrgAdd(bytes32 shortName, address schoolAddress, string detail);
 
-    uint256 private orgCount;
+    uint32 private orgCount;
 
     struct CredentialOrg {
         bytes32 shortName;  // School shortName
@@ -26,9 +26,9 @@ contract CredentialOrgFactory is Pausable {
     }
     
     modifier onlyBy(address _account){
-        uint foundAccount = 0;
-        for(uint i = 0; i < orgCount; i++){
-            if (msg.sender == orgPositionToAddress[i]){
+        uint32 foundAccount = 0;
+        for(uint32 i = 0; i < orgCount; i++){
+            if (msg.sender == orgPositionToAddress[uint32(i)]){
                 foundAccount = 1;
             }
         }
@@ -56,11 +56,11 @@ contract CredentialOrgFactory is Pausable {
     */
     function createCredentialOrg(bytes32 _shortName, address _schoolAddress, bytes6 _schoolCode, string _officialSchoolName) 
     public
-    returns (uint256 position)
+    returns (uint32 position)
     {
         emit NewOrgAdd(_shortName, _schoolAddress, "New Org Add (PRE)");
         require(_shortName.length > 0 && _schoolAddress != 0 && _schoolCode.length == 6 && bytes(_officialSchoolName).length > 0 && bytes(_officialSchoolName).length < 70);
-        position = credentialOrgs.push(CredentialOrg(_shortName, _schoolCode, _officialSchoolName, _schoolAddress));
+        position = uint32(credentialOrgs.push(CredentialOrg(_shortName, _schoolCode, _officialSchoolName, _schoolAddress)));
         if (position > 0){
             orgPositionToAddress[position] = _schoolAddress;
             addressToOrgPosition[_schoolAddress] = position - 1;
@@ -76,7 +76,7 @@ contract CredentialOrgFactory is Pausable {
     * @dev allows owner to create new credentialing orgs
     * @param _credentialPosition allows selection of credentialing orgs details.
     */
-    function selectCredentialOrg(uint256 _credentialPosition) 
+    function selectCredentialOrg(uint32 _credentialPosition) 
     public view
     returns (bytes32 shortName, bytes6 schoolCode, string officialSchoolName, address schoolAddress)
     {
@@ -94,7 +94,7 @@ contract CredentialOrgFactory is Pausable {
     {
         IsOrgAddress = false;
         require(_credentialOrgAddress != 0);
-        for (uint256 i = 0; i < orgCount; i++){
+        for (uint32 i = 0; i < orgCount; i++){
             if (credentialOrgs[i].schoolAddress == _credentialOrgAddress){
                 IsOrgAddress = true;
             }
@@ -107,7 +107,7 @@ contract CredentialOrgFactory is Pausable {
     */
     function selectOrgCount()
     public view
-    returns (uint256 returnOrgCount)
+    returns (uint32 returnOrgCount)
     {
         returnOrgCount = orgCount;
         return (returnOrgCount);

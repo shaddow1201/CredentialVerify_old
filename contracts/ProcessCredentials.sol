@@ -21,7 +21,7 @@ contract ProcessCredentials is CredentialOrgFactory, ApplicantFactory {
     
     OrgProcessor[] public orgProcessors;
     
-    uint256 public orgProcessorsCount;
+    uint32 public orgProcessorsCount;
     
     // constructor
     constructor () public {
@@ -31,14 +31,14 @@ contract ProcessCredentials is CredentialOrgFactory, ApplicantFactory {
     // functions
     function updateOrgProcessors() public onlyOwner {
         bool found = false;
-        uint256 localOrgCount = selectOrgCount();
+        uint32 localOrgCount = selectOrgCount();
         if (orgProcessorsCount != localOrgCount){
-            for(uint256 i=0; i < localOrgCount; i++){
+            for(uint32 i=0; i < localOrgCount; i++){
                 bytes32 shortName;
                 bytes6 schoolCode;
                 string memory officialSchoolName;
                 address schoolAddress;
-                for (uint256 j=0; j < orgProcessorsCount; j++){
+                for (uint32 j=0; j < orgProcessorsCount; j++){
                     (shortName, schoolCode, officialSchoolName, schoolAddress) = selectCredentialOrg(i);
                     if (schoolAddress == orgProcessors[j].credentialOrgAddress){
                         found = true;
@@ -53,13 +53,13 @@ contract ProcessCredentials is CredentialOrgFactory, ApplicantFactory {
         }
     }
 
-    function updateApplicant(uint _position) public onlyBy(msg.sender) {
+    function updateApplicant(uint32 _position) public onlyBy(msg.sender) {
         require(msg.sender == applicants[_position].collegeAddress);
         applicants[_position].processDate = block.timestamp;
     }
     
     
-    function selectNextApplicantID(uint _startPosition) public view onlyBy(msg.sender) returns (uint ID){
+    function selectNextApplicantID(uint32 _startPosition) public view onlyBy(msg.sender) returns (uint ID){
         require(_startPosition > 0 && _startPosition <= applicantCount);
         uint startPosition = _startPosition;
         bool foundRec = false;
@@ -74,19 +74,17 @@ contract ProcessCredentials is CredentialOrgFactory, ApplicantFactory {
         return (foundPosition);
     }
     
-    function selectApplicantPartA(uint _position) public view onlyBy(msg.sender) returns (address studentAddress, address collegeAddress, string SSN, string collegeStudentID, bytes32 firstName, bytes32 middleName){
+    function selectApplicantPartA(uint32 _position) public view onlyBy(msg.sender) returns (address studentAddress, address collegeAddress, string SSN, string collegeStudentID, bytes32 firstName, bytes32 middleName){
         require(_position > 0 && _position <= applicantCount);
         return (applicants[_position].studentAddress, applicants[_position].collegeAddress, applicants[_position].SSN, applicants[_position].collegeStudentID, applicants[_position].firstName, applicants[_position].middleName);
     }
 
-    function selectApplicantPartB(uint _position) public view onlyBy(msg.sender) returns (bytes32 lastName, bytes8 nameSuffix, bytes8 dateOfBirth, uint insertDate){
+    function selectApplicantPartB(uint32 _position) public view onlyBy(msg.sender) returns (bytes32 lastName, bytes8 nameSuffix, bytes8 dateOfBirth, uint insertDate){
         require(_position > 0 && _position <= applicantCount);
         return (applicants[_position].lastName, applicants[_position].nameSuffix, applicants[_position].dateOfBirth, applicants[_position].insertDate);
     }
 
-
-
-    function processApplicant(uint _position) public onlyBy(msg.sender) {
+    function processApplicant(uint32 _position) public onlyBy(msg.sender) {
         applicants[_position].processDate = block.timestamp;
     }
 }

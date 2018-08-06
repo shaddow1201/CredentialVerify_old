@@ -5,8 +5,8 @@ var ApplicantFactory = artifacts.require("ApplicantFactory");
 
 module.exports = function(deployer) {
   deployer.deploy(CredentialOrgFactory);
-  deployer.deploy(CredentialFactory);
-  deployer.deploy(ApplicantFactory);
+  //deployer.deploy(CredentialFactory);
+  //deployer.deploy(ApplicantFactory);
   //deployer.deploy(ProcessCredentials);
 };
 
