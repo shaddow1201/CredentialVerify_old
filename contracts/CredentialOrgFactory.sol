@@ -1,11 +1,15 @@
 pragma solidity ^0.4.21;
+
 /**
  * @title CredentialOrgFactory
  * @dev The CredentialOrgFactory allows the contract owner to add new credentialing orgs
  */
-import "./Ownable.sol";
+import "./Pausable.sol";
+import "./SafeMath.sol";
 
-contract CredentialOrgFactory is Ownable {
+contract CredentialOrgFactory is Pausable {
+
+    using SafeMath for uint256;
 
     mapping(uint => address) orgPositionToAddress;
     mapping(address => uint) addressToOrgPosition;
@@ -28,7 +32,7 @@ contract CredentialOrgFactory is Ownable {
                 foundAccount = 1;
             }
         }
-        if (foundAccount == 0) revert();
+        if (foundAccount == 0) revert("Not Authorized");
         _;
     }
     
@@ -51,19 +55,19 @@ contract CredentialOrgFactory is Ownable {
     * @param _officialSchoolName official School Name
     */
     function createCredentialOrg(bytes32 _shortName, address _schoolAddress, bytes6 _schoolCode, string _officialSchoolName) 
-    onlyOwner public
-    returns (uint position)
+    public
+    returns (uint256 position)
     {
         emit NewOrgAdd(_shortName, _schoolAddress, "New Org Add (PRE)");
         require(_shortName.length > 0 && _schoolAddress != 0 && _schoolCode.length == 6 && bytes(_officialSchoolName).length > 0 && bytes(_officialSchoolName).length < 70);
         position = credentialOrgs.push(CredentialOrg(_shortName, _schoolCode, _officialSchoolName, _schoolAddress));
-        if (position >= 0){
+        if (position > 0){
             orgPositionToAddress[position] = _schoolAddress;
-            addressToOrgPosition[_schoolAddress] = position-1;
+            addressToOrgPosition[_schoolAddress] = position - 1;
             orgCount++;
             emit NewOrgAdd(_shortName, _schoolAddress, "New Org Add (SUCCESS)");
         } else {
-            revert();
+            revert("New Org Add (FAIL)");
             emit NewOrgAdd(_shortName, _schoolAddress, "New Org Add (FAIL)");
         }
         return (position);
