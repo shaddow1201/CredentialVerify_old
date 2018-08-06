@@ -7,10 +7,10 @@ import "../contracts/CredentialOrgFactory.sol";
 contract TestCredentialOrgFactory {
     CredentialOrgFactory credentialOrgFactory = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
 
-    // Test to see if base accounts were added. (base, scc and sfcc)
+    // Test to see if base account was added.
     function testSelectCredentialOrgCount() public {
         uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
-        uint256 expected = 3;
+        uint256 expected = 2;
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
 
@@ -22,7 +22,7 @@ contract TestCredentialOrgFactory {
         address schoolAddress;
         
         (shortName, schoolCode, officialSchoolName, schoolAddress) = credentialOrgFactory.selectCredentialOrg(0);
-        bytes32 expected = "ABC";
+        bytes32 expected = "INITRECORD";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
     }

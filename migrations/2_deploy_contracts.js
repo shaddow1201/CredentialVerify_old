@@ -1,6 +1,6 @@
 var CredentialOrgFactory = artifacts.require("CredentialOrgFactory");
-var CredentialFactory = artifacts.require("CredentialFactory");
-var ApplicantFactory = artifacts.require("ApplicantFactory");
+//var CredentialFactory = artifacts.require("CredentialFactory");
+//var ApplicantFactory = artifacts.require("ApplicantFactory");
 //var ProcessCredentials = artifacts.require("ProcessCredentials");
 
 module.exports = function(deployer) {
