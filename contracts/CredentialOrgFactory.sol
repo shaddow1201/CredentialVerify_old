@@ -75,15 +75,15 @@ contract CredentialOrgFactory is Pausable {
     }
 
     /**
-    * @dev allows owner to create new credentialing orgs
-    * @param _credentialPosition allows selection of credentialing orgs details.
+    * @dev allows selection of a credentialingOrg by position
+    * @param _credentialOrgPosition allows selection of credentialing orgs details.
     */
-    function selectCredentialOrg(uint32 _credentialPosition) 
+    function selectCredentialOrg(uint32 _credentialOrgPosition) 
     public view
     returns (bytes32 shortName, bytes6 schoolCode, string officialSchoolName, address schoolAddress)
     {
-        require(_credentialPosition >= 0 && _credentialPosition < orgCount);
-        return (credentialOrgs[_credentialPosition].shortName, credentialOrgs[_credentialPosition].schoolCode, credentialOrgs[_credentialPosition].officialSchoolName, credentialOrgs[_credentialPosition].schoolAddress);
+        require(_credentialOrgPosition >= 0 && _credentialOrgPosition < orgCount);
+        return (credentialOrgs[_credentialOrgPosition].shortName, credentialOrgs[_credentialOrgPosition].schoolCode, credentialOrgs[_credentialOrgPosition].officialSchoolName, credentialOrgs[_credentialOrgPosition].schoolAddress);
     }
     
     /**

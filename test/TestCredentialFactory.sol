@@ -9,8 +9,8 @@ contract TestCredentialFactory {
 
     function testSelectCredentialCount() public {
         uint256 testVal = credentialFactory.SelectCredentialCount();
-        uint256 expected = 3;
-        Assert.equal(testVal, expected, "Expected Credential Count (3)");
+        uint256 expected = 1;
+        Assert.equal(testVal, expected, "Expected Credential Count (1)");
     }
 
     function testIsActiveValid() public {

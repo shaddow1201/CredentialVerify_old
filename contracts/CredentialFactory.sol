@@ -6,8 +6,13 @@ import "./CredentialOrgFactory.sol";
  */
 contract CredentialFactory is CredentialOrgFactory{
     
+    using SafeMath32 for uint32;
     // events
     event CredentialFactoryActivity(address credentialOrg, string credentialTitle, string detail);
+
+    // mapping
+    mapping (address => uint32) addressToCredentialCount;
+    mapping (address => uint32) addressToActiveCredentialCount;
 
     // structs
     struct Credential {
@@ -19,14 +24,14 @@ contract CredentialFactory is CredentialOrgFactory{
         bool isActive;              // is CredentialActive for use
     }
     Credential[] private credentials;
-    uint256 private credentialCount;
+    uint32 private credentialCount;
     
     // constructor
     constructor () public {
-        credentialCount=0;
+        credentialCount = 0;
         createCredentialByOwner(owner, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
-        createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
-        createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
+        //createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
+        //createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
     }
     
     // functions
@@ -44,11 +49,12 @@ contract CredentialFactory is CredentialOrgFactory{
         require(_credentialLevel.length == 1 && bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70 && bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50);
         uint position = credentials.push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, _insertDate, true));
         if(position >= 0){
-            credentialCount++;
+            credentialCount = credentialCount.add(1);
+            addressToActiveCredentialCount[msg.sender] = addressToActiveCredentialCount[msg.sender].add(1);
+            addressToCredentialCount[msg.sender] = addressToCredentialCount[msg.sender].add(1);
             emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
         } else {
             emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
-            revert();
         }
     }
 
@@ -66,7 +72,7 @@ contract CredentialFactory is CredentialOrgFactory{
         require(_credentialLevel.length == 1 && bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70 && bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50);
         uint position = credentials.push(Credential(_credentialOrg, _credentialLevel, _credentialTitle, _credentialDivision, _insertDate, true));
         if(position >= 0){
-            credentialCount++;
+            credentialCount = credentialCount.add(1);
             emit CredentialFactoryActivity(_credentialOrg, _credentialTitle, "New Credential Add (SUCCCESS)");
         } else {
             emit CredentialFactoryActivity(_credentialOrg, _credentialTitle, "New Credential Add (FAILED)");
@@ -75,20 +81,39 @@ contract CredentialFactory is CredentialOrgFactory{
     }
 
     /**
-    * @dev allows setting credential active or inactive
-    * @param _position Credential position in array
-    * @param _isActive bool value for set.
+    * @dev allows selection of credential based on position.
+    * @param _credentialPosition allows selection of credentialing orgs details.
     */
-    function setCredentialInactiveFlag(uint _position, bool _isActive)
+    function selectCredential(uint32 _credentialPosition) 
+    public view
+    returns (bytes1 credentialLevel, string credentialTitle, string credentialDivision, bytes8 credentialInsertDate, bool isActive)
+    {
+        require(_credentialPosition >= 0 && _credentialPosition < credentialCount);
+        return (credentials[_credentialPosition].credentialLevel, credentials[_credentialPosition].credentialTitle, credentials[_credentialPosition].credentialDivision, credentials[_credentialPosition].credentialInsertDate,credentials[_credentialPosition].isActive);
+    }
+
+    /**
+    * @dev allows setting credential inactive by it's owner
+    * @param _position Credential position in array
+    */
+    function setCredentialInactiveFlag(uint _position)
     public onlyBy(msg.sender)
     {
-        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender && (_isActive == true || _isActive == false));
-        credentials[_position].isActive = _isActive;
-        if (_isActive){
-            emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Active)");
-        } else {
-            emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Inactive)");
-        }
+        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender);
+        credentials[_position].isActive = false;
+        emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Inactive)");
+    }
+
+    /**
+    * @dev allows setting credential inactive by it's credentialing org.
+    * @param _position Credential position in array
+    */
+    function setCredentialActiveFlag(uint _position)
+    public onlyBy(msg.sender)
+    {
+        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender);
+        credentials[_position].isActive = true;
+        emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Active)");
     }
 
     /**
@@ -96,7 +121,7 @@ contract CredentialFactory is CredentialOrgFactory{
     */
     function SelectCredentialCount()
     public view
-    returns (uint256 returnCredentialCount)
+    returns (uint32 returnCredentialCount)
     {
         returnCredentialCount = credentialCount;
         return (returnCredentialCount);
