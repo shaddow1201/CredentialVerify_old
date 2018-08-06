@@ -20,7 +20,7 @@ contract CredentialFactory is CredentialOrgFactory{
         bytes1 credentialLevel;     // single byte string 
         string credentialTitle;     // 70 or less string
         string credentialDivision;  // 50 or less string
-        bytes8 credentialInsertDate;// Credential InsertDate YYYYMMDD
+        uint32 credentialInsertDate;// Credential Insert timestamp
         bool isActive;              // is CredentialActive for use
     }
     Credential[] private credentials;
@@ -29,9 +29,9 @@ contract CredentialFactory is CredentialOrgFactory{
     // constructor
     constructor () public {
         credentialCount = 0;
-        createCredentialByOwner(owner, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
-        //createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
-        //createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts", "20180703");
+        createCredentialByOwner(owner, "A", "Associate Degree in Basket Weaving", "BA - Arts");
+        //createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts");
+        //createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts");
     }
     
     // functions
@@ -40,14 +40,14 @@ contract CredentialFactory is CredentialOrgFactory{
     * @param _credentialLevel Credential Level
     * @param _credentialTitle CredentialTitle
     * @param _credentialDivision Credential Division
-    * @param _insertDate Credential InsertDate (YYYYMMDD)
     */
-    function createCredential(bytes1 _credentialLevel, string _credentialTitle, string _credentialDivision, bytes8 _insertDate) 
+    function createCredential(bytes1 _credentialLevel, string _credentialTitle, string _credentialDivision) 
     public onlyBy(msg.sender)
     {
         emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (ATTEMPT)");
-        require(_credentialLevel.length == 1 && bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70 && bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50);
-        uint position = credentials.push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, _insertDate, true));
+        require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
+        require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
+        uint position = credentials.push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true));
         if(position >= 0){
             credentialCount = credentialCount.add(1);
             addressToActiveCredentialCount[msg.sender] = addressToActiveCredentialCount[msg.sender].add(1);
@@ -63,20 +63,19 @@ contract CredentialFactory is CredentialOrgFactory{
     * @param _credentialLevel Credential Level
     * @param _credentialTitle CredentialTitle
     * @param _credentialDivision Credential Division
-    * @param _insertDate Credential InsertDate (YYYYMMDD)
     */
-    function createCredentialByOwner(address _credentialOrg, bytes1 _credentialLevel, string _credentialTitle, string _credentialDivision, bytes8 _insertDate) 
+    function createCredentialByOwner(address _credentialOrg, bytes1 _credentialLevel, string _credentialTitle, string _credentialDivision) 
     public onlyOwner
     {
         emit CredentialFactoryActivity(_credentialOrg, _credentialTitle, "New Credential Add (ATTEMPT)");
-        require(_credentialLevel.length == 1 && bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70 && bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50);
-        uint position = credentials.push(Credential(_credentialOrg, _credentialLevel, _credentialTitle, _credentialDivision, _insertDate, true));
+        require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredentialByOwner - Title length problem");
+        require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredentialByOwner - Division length problem");
+        uint position = credentials.push(Credential(_credentialOrg, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true));
         if(position >= 0){
             credentialCount = credentialCount.add(1);
             emit CredentialFactoryActivity(_credentialOrg, _credentialTitle, "New Credential Add (SUCCCESS)");
         } else {
             emit CredentialFactoryActivity(_credentialOrg, _credentialTitle, "New Credential Add (FAILED)");
-            revert();
         }
     }
 
@@ -86,9 +85,9 @@ contract CredentialFactory is CredentialOrgFactory{
     */
     function selectCredential(uint32 _credentialPosition) 
     public view
-    returns (bytes1 credentialLevel, string credentialTitle, string credentialDivision, bytes8 credentialInsertDate, bool isActive)
+    returns (bytes1 credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive)
     {
-        require(_credentialPosition >= 0 && _credentialPosition < credentialCount);
+        require(_credentialPosition >= 0 && _credentialPosition < credentialCount, "Credential Bounds Error");
         return (credentials[_credentialPosition].credentialLevel, credentials[_credentialPosition].credentialTitle, credentials[_credentialPosition].credentialDivision, credentials[_credentialPosition].credentialInsertDate,credentials[_credentialPosition].isActive);
     }
 
@@ -99,8 +98,10 @@ contract CredentialFactory is CredentialOrgFactory{
     function setCredentialInactiveFlag(uint _position)
     public onlyBy(msg.sender)
     {
-        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender);
+        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender, "setCredentialInactiveFlag: position or Org failure");
+        require(credentials[_position].isActive == true, "Credential is not Active");
         credentials[_position].isActive = false;
+        addressToActiveCredentialCount[msg.sender] = addressToActiveCredentialCount[msg.sender].sub(1);
         emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Inactive)");
     }
 
@@ -111,8 +112,10 @@ contract CredentialFactory is CredentialOrgFactory{
     function setCredentialActiveFlag(uint _position)
     public onlyBy(msg.sender)
     {
-        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender);
+        require(_position >= 0 && credentials[_position].credentialOrg == msg.sender, "setCredentialActiveFlag: position or Org failure");
+        require(credentials[_position].isActive == false, "Credential is already Active");
         credentials[_position].isActive = true;
+        addressToActiveCredentialCount[msg.sender] = addressToActiveCredentialCount[msg.sender].add(1);
         emit CredentialFactoryActivity(msg.sender, credentials[_position].credentialTitle, "SetCredentialIsActive - (Set Active)");
     }
 
