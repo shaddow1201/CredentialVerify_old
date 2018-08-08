@@ -39,7 +39,7 @@ contract ProcessCredentials is CredentialOrgFactory, ApplicantFactory {
                 string memory officialSchoolName;
                 address schoolAddress;
                 for (uint32 j=0; j < orgProcessorsCount; j++){
-                    (shortName, schoolCode, officialSchoolName, schoolAddress) = selectCredentialOrg(i);
+                    //(shortName, schoolCode, officialSchoolName, schoolAddress) = selectCredentialOrg(i);
                     if (schoolAddress == orgProcessors[j].credentialOrgAddress){
                         found = true;
                     }

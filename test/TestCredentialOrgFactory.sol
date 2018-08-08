@@ -6,22 +6,23 @@ import "../contracts/CredentialOrgFactory.sol";
 
 contract TestCredentialOrgFactory {
     CredentialOrgFactory credentialOrgFactory = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
-
-    // Test to see if base account was added.
+    /*
+    * @dev Test to see if base account was added.
+    */
     function testSelectCredentialOrgCount() public {
         uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
-        uint256 expected = 2;
+        uint256 expected = 1;
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
 
-    // test the return of a college.
+    // @dev test the return of a college.
     function testSelectCredentialOrg() public {
         bytes32 shortName;
         bytes6 schoolCode;
         string memory officialSchoolName;
         address schoolAddress;
         
-        (shortName, schoolCode, officialSchoolName, schoolAddress) = credentialOrgFactory.selectCredentialOrg(0);
+        (shortName, schoolCode, officialSchoolName, schoolAddress) = credentialOrgFactory.selectCredentialOrgByPosition(0);
         bytes32 expected = "INITRECORD";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
@@ -29,25 +30,27 @@ contract TestCredentialOrgFactory {
 
     // test to see if invalid org returns false
     function testisCredentialOrgInValid() public {
-        bool testVal = credentialOrgFactory.isCredentialOrg(0xCDC30Be90065b8Dda7eb417fAe64d6697d5A8965);
+        bool testVal = credentialOrgFactory.isCredentialOrg(0x3018d5d4653ee2ae42c73d9208592ad9f3b6f3a3);
         Assert.isFalse(testVal, "Base Inserted Test Org Valid");
     }
 
-    // test to see if valid org returns false
+    // test to see if valid org returns true
     function testIsCredentialOrgValid() public {
         bytes32 shortName;
         bytes6 schoolCode;
         string memory officialSchoolName;
         address schoolAddress;
         
-        (shortName, schoolCode, officialSchoolName, schoolAddress) = credentialOrgFactory.selectCredentialOrg(0);
+        (shortName, schoolCode, officialSchoolName, schoolAddress) = credentialOrgFactory.selectCredentialOrgByPosition(0);
+
         bool testVal = credentialOrgFactory.isCredentialOrg(schoolAddress);
-        Assert.isTrue(testVal, "Base Inserted Test Org Valid");
+        Assert.isTrue(testVal, "Credential Org Valid");
+
     }
     // Test to see if insertion possible.
     function testInsertCredentialOrg() public {
         uint256 checkVal = uint256(credentialOrgFactory.selectOrgCount());
-        uint256 arrayLen = credentialOrgFactory.createCredentialOrg("TestOrg", 0xc4c0Fd9475A6C8D1656aeD27d2582bE2608Eb8c7, "XXXX", "Test School of Dentistry");
+        uint256 arrayLen = credentialOrgFactory.createCredentialOrg("TestOrg", "XXXX", "Test School of Dentistry");
         Assert.notEqual(arrayLen, checkVal, "Insert of CredentialOrg Test Successful");
     }
 
