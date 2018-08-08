@@ -51,6 +51,7 @@ contract TestCredentialOrgFactory {
     function testInsertCredentialOrg() public {
         uint256 checkVal = uint256(credentialOrgFactory.selectOrgCount());
         uint256 arrayLen = credentialOrgFactory.createCredentialOrg("TestOrg", "XXXX", "Test School of Dentistry");
+        
         Assert.notEqual(arrayLen, checkVal, "Insert of CredentialOrg Test Successful");
     }
 
