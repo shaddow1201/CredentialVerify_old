@@ -17,14 +17,14 @@ contract CredentialFactory is CredentialOrgFactory{
 
     // structs
     struct Credential {
-        //address credentialOrg;      // CredentialOwnerAddress
+        address credentialOrg;      // CredentialOwnerAddress
         bytes1 credentialLevel;     // single byte string 
         string credentialTitle;     // 70 or less string
         string credentialDivision;  // 50 or less string
         uint32 credentialInsertDate;// Credential Insert timestamp
         bool isActive;              // is CredentialActive for use
     }
-   
+    uint32 public credentialCount;
     // constructor
     constructor () public {
         //credentialCount = 0;
@@ -47,11 +47,9 @@ contract CredentialFactory is CredentialOrgFactory{
         if (isCredentialOrg(msg.sender)){
             require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
             require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
-            //CredentialOrgCredentials credOrgHolder = addressToCredentialOrgCredentials[msg.sender];
-            uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential( _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
-            //uint32(addressToCredentialOrgCredentials[msg.sender].credentials.push(Credential( _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
-
+            uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
             if(position >= 0){
+                credentialCount = credentialCount.add(1);
                 orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
                 orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].add(1);
                 emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
@@ -83,15 +81,12 @@ contract CredentialFactory is CredentialOrgFactory{
     function setCredentialInactiveFlag(uint _position)
     public //onlyBy(msg.sender)
     {
-        if (isCredentialOrg(msg.sender)){
-            require(_position >= 0, "setCredentialInactiveFlag: Position or Org failure");
-            require(orgAddressToCredentials[msg.sender][_position].isActive == true, "Credential is NOT Active");
-            orgAddressToCredentials[msg.sender][_position].isActive = false;
-            orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].sub(1);
-            emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialIsActive - (Set Inactive)");
-        } else {
-            emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialIsActive - (FAIL) not CredentialOrg");
-        }
+        require(msg.sender == orgAddressToCredentials[msg.sender][_position].credentialOrg, "setCredeentialInactiveflag - (FAIL) not owner");
+        require(_position >= 0, "setCredentialInactiveFlag: Position or Org failure");
+        require(orgAddressToCredentials[msg.sender][_position].isActive == true, "Credential is NOT Active");
+        orgAddressToCredentials[msg.sender][_position].isActive = false;
+        orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].sub(1);
+        emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialIsActive - (Set Inactive)");
     }
 
     /**
@@ -101,15 +96,12 @@ contract CredentialFactory is CredentialOrgFactory{
     function setCredentialActiveFlag(uint _position)
     public //onlyBy(msg.sender)
     {
-        if (isCredentialOrg(msg.sender)){
-            require(_position >= 0 , "setCredentialActiveFlag: position lookup failure");
-            require(orgAddressToCredentials[msg.sender][_position].isActive == false, "Credential is already Active");
-            orgAddressToCredentials[msg.sender][_position].isActive = true;
-            orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].add(1);
-            emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialIsActive - (Set Active)");
-        } else {
-            emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialActive - (FAIL) not CredentialOrg");
-        }
+        require(msg.sender == orgAddressToCredentials[msg.sender][_position].credentialOrg, "setCredeentialInactiveflag - (FAIL) not owner");
+        require(_position >= 0 , "setCredentialActiveFlag: position lookup failure");
+        require(orgAddressToCredentials[msg.sender][_position].isActive == false, "Credential is already Active");
+        orgAddressToCredentials[msg.sender][_position].isActive = true;
+        orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].add(1);
+        emit CredentialFactoryActivity(msg.sender, orgAddressToCredentials[msg.sender][_position].credentialTitle, "SetCredentialIsActive - (Set Active)");
     }
 
     /**

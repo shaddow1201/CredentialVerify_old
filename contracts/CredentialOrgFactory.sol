@@ -15,9 +15,8 @@ contract CredentialOrgFactory is Pausable {
     using SafeMath32 for uint32;
 
     /**
-    * @dev 
+    * @dev mappings
     */
-    // mappings
     mapping(uint32 => address) orgPositionToAddress;
     mapping(address => CredentialOrg) addressToCredentialOrg;
     
