@@ -30,7 +30,7 @@ contract TestCredentialOrgFactory {
 
     // test to see if invalid org returns false
     function testisCredentialOrgInValid() public {
-        bool testVal = credentialOrgFactory.isCredentialOrg(0x3018d5d4653ee2ae42c73d9208592ad9f3b6f3a3);
+        bool testVal = credentialOrgFactory.isCredentialOrg(0x2b61e09EE17839Ec73CCA6b83f5f5D811D5EDFAd);
         Assert.isFalse(testVal, "Base Inserted Test Org Valid");
     }
 

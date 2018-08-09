@@ -1,10 +1,16 @@
 pragma solidity ^0.4.21;
-import "./CredentialOrgFactory.sol";
+import "./Pausable.sol";
+import "./SafeMath32.sol";
 /**
  * @title CredentialFactory
  * @dev The CredentialFactory allows the credentialOrgs to add/lookup credentials
  */
-contract CredentialFactory is CredentialOrgFactory{
+interface CredentialOrgFactory{
+    function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
+}
+
+
+contract CredentialFactory is Pausable{
     
     using SafeMath32 for uint32;
     // events
@@ -25,15 +31,24 @@ contract CredentialFactory is CredentialOrgFactory{
         bool isActive;              // is CredentialActive for use
     }
     uint32 public credentialCount;
+    address public credentialOrgContractAddress;
+    
     // constructor
     constructor () public {
-        //credentialCount = 0;
+        credentialCount = 0;
+        //credentialOrgContractAddress = _credentialOrgAddress;
         createCredential("A", "Associate Degree in Basket Weaving", "BA - Arts");
         //createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts");
         //createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts");
     }
-    
     // functions
+    function setAddress(address _credentialOrgContractAddress) public {
+        if (msg.sender == owner){
+            credentialOrgContractAddress = _credentialOrgContractAddress;
+        }
+    }
+
+
     /**
     * @dev allows credentialing Orgs to create new credentials
     * @param _credentialLevel Credential Level
@@ -44,7 +59,8 @@ contract CredentialFactory is CredentialOrgFactory{
     public //onlyBy(msg.sender)
     {
         emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (ATTEMPT)");
-        if (isCredentialOrg(msg.sender)){
+        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
+        if (cof.isCredentialOrg(msg.sender)){
             require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
             require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
             uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
@@ -71,7 +87,7 @@ contract CredentialFactory is CredentialOrgFactory{
     returns (bytes1 credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive)
     {
         require(_position >= 0 && _position < orgAddressToCredentialTotalCount[msg.sender], "selectCredential: Credential Bounds Error");
-        return (orgAddressToCredentials[msg.sender][_position].credentialLevel,orgAddressToCredentials[msg.sender][_position].credentialTitle, orgAddressToCredentials[msg.sender][_position].credentialDivision, orgAddressToCredentials[msg.sender][_position].credentialInsertDate,orgAddressToCredentials[msg.sender][_position].isActive);
+        return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision, orgAddressToCredentials[_credentialOrgAddress][_position].credentialInsertDate,orgAddressToCredentials[_credentialOrgAddress][_position].isActive);
     }
 
     /**
@@ -125,7 +141,6 @@ contract CredentialFactory is CredentialOrgFactory{
         returnCredentialCount = orgAddressToCredentialTotalCount[_credentialOrgAddress];
         return (returnCredentialCount);
     }
-
 
     /**
     * @dev allows checking of isActive flag for credential

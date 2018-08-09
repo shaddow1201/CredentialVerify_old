@@ -5,7 +5,7 @@ pragma solidity ^0.4.21;
  * @dev The CredentialOrgFactory allows the contract owner to add new credentialing orgs
  */
 import "./Pausable.sol";
-import "./SafeMath.sol";
+import "./SafeMath32.sol";
 
 contract CredentialOrgFactory is Pausable {
 
@@ -48,7 +48,7 @@ contract CredentialOrgFactory is Pausable {
     */
     modifier onlyBy(address _credentialOrgAddress){
         uint32 foundAccount = 0;
-        CredentialOrg testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
+        CredentialOrg memory testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
         if (testCredentialOrg.schoolAddress != 0){
             foundAccount = 1;
         }
@@ -127,7 +127,7 @@ contract CredentialOrgFactory is Pausable {
         schoolCode = "";
         officialSchoolName = "";
         schoolAddress = 0;
-        CredentialOrg testCred = addressToCredentialOrg[_credentialOrgAddress];
+        CredentialOrg memory testCred = addressToCredentialOrg[_credentialOrgAddress];
         if (testCred.schoolAddress != 0){
             emit CredentialOrgEvent(msg.sender, "selectCredentialOrg~address - (SUCCESS)");
             return (testCred.shortName, testCred.schoolCode, testCred.officialSchoolName, testCred.schoolAddress);
@@ -147,7 +147,7 @@ contract CredentialOrgFactory is Pausable {
     returns (bool IsOrgAddress)
     {
         IsOrgAddress = false;
-        CredentialOrg testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
+        CredentialOrg memory testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
         if (testCredentialOrg.schoolAddress != 0){
             IsOrgAddress = true;
             emit CredentialOrgEvent(msg.sender, "isCredentialOrg - (SUCCESS)");
