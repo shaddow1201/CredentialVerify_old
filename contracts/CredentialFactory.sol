@@ -24,7 +24,7 @@ contract CredentialFactory is Pausable{
     // structs
     struct Credential {
         address credentialOrg;      // CredentialOwnerAddress
-        bytes1 credentialLevel;     // single byte string 
+        string credentialLevel;     // 50 or less string
         string credentialTitle;     // 70 or less string
         string credentialDivision;  // 50 or less string
         uint32 credentialInsertDate;// Credential Insert timestamp
@@ -36,31 +36,26 @@ contract CredentialFactory is Pausable{
     // constructor
     constructor () public {
         credentialCount = 0;
-        //credentialOrgContractAddress = _credentialOrgAddress;
-        createCredential("A", "Associate Degree in Basket Weaving", "BA - Arts");
-        //createCredentialByOwner(0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C, "A", "Associate Degree in Basket Weaving", "BA - Arts");
-        //createCredentialByOwner(0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "A", "Associate Degree in Basket Weaving", "BA - Arts");
     }
     // functions
-    function setAddress(address _credentialOrgContractAddress) public {
+    function setAddress(address _credentialOrgContractAddress) public onlyOwner {
         if (msg.sender == owner){
             credentialOrgContractAddress = _credentialOrgContractAddress;
         }
     }
-
-
     /**
     * @dev allows credentialing Orgs to create new credentials
     * @param _credentialLevel Credential Level
     * @param _credentialTitle CredentialTitle
     * @param _credentialDivision Credential Division
     */
-    function createCredential(bytes1 _credentialLevel, string _credentialTitle, string _credentialDivision) 
+    function createCredential(string _credentialLevel, string _credentialTitle, string _credentialDivision) 
     public //onlyBy(msg.sender)
     {
         emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (ATTEMPT)");
         CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
         if (cof.isCredentialOrg(msg.sender)){
+            require(bytes(_credentialLevel).length > 0 && bytes(_credentialLevel).length < 50, "createCredential - Level length problem");
             require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
             require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
             uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
@@ -84,7 +79,7 @@ contract CredentialFactory is Pausable{
     */
     function selectCredential(address _credentialOrgAddress, uint32 _position) 
     public view
-    returns (bytes1 credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive)
+    returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive)
     {
         require(_position >= 0 && _position < orgAddressToCredentialTotalCount[msg.sender], "selectCredential: Credential Bounds Error");
         return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision, orgAddressToCredentials[_credentialOrgAddress][_position].credentialInsertDate,orgAddressToCredentials[_credentialOrgAddress][_position].isActive);
@@ -123,7 +118,7 @@ contract CredentialFactory is Pausable{
     /**
     * @dev allows checking of CredentialCount
     */
-    function SelectOrgCredentialActiveCount(address _credentialOrgAddress)
+    function selectOrgCredentialActiveCount(address _credentialOrgAddress)
     public view
     returns (uint32 returnCredentialCount)
     {
@@ -134,7 +129,7 @@ contract CredentialFactory is Pausable{
     /**
     * @dev allows checking of CredentialCount
     */
-    function SelectOrgCredentialCount(address _credentialOrgAddress)
+    function selectOrgCredentialCount(address _credentialOrgAddress)
     public view
     returns (uint32 returnCredentialCount)
     {

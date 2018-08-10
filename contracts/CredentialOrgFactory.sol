@@ -62,9 +62,6 @@ contract CredentialOrgFactory is Pausable {
     constructor() public {
         credentialOrgCount = 0;
         createCredentialOrg("INITRECORD", "000000","Initialization Record for owner.");
-        //createCredentialOrg("BCD", 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, "000000"," BaseRecordFor Account A");
-        //createCredentialOrg("SCC",0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C,"003793","Spokane Community College");
-        //createCredentialOrg("SFCC",0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB, "009544","Spokane Falls Community College");
     }
     
     /**
