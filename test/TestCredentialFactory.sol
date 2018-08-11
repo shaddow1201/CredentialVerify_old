@@ -7,6 +7,20 @@ import "../contracts/CredentialFactory.sol";
 contract TestCredentialFactory {
     CredentialFactory credentialFactory = CredentialFactory(DeployedAddresses.CredentialFactory());
 
+    function testCreateCredential() public {
+        credentialFactory.createCredential("A","AAAA","AAAAA");
+        string memory credentialLevel;
+        string memory credentialTitle;
+        string memory credentialDivision; 
+        uint32 credentialInsertDate;
+        bool isActive;
+
+        (credentialLevel, credentialTitle, credentialDivision, credentialInsertDate, isActive) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 1);
+
+        Assert.isTrue(isActive, "Valid isActive Test.");
+    }
+
+
     function testIsActiveValid() public {
         bool r = credentialFactory.isCredentialActive(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
         Assert.isTrue(r, "Valid isActive Test.");
@@ -35,9 +49,9 @@ contract TestCredentialFactory {
         bool isActive;
 
         (credentialLevel, credentialTitle, credentialDivision, credentialInsertDate, isActive) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
-        string memory expected = "BA-Arts";
+        string memory expected = "AAAA";
 
-        Assert.equal(credentialDivision,expected,"Credential Division Matches Expected (BA-Arts)");
+        Assert.equal(credentialDivision,expected,"Credential Division Matches Expected (AAAA)");
 
     }
 
