@@ -3,14 +3,14 @@ pragma solidity ^0.4.21;
  * @title ApplicantFactory
  * @dev The ApplicantFactory allows applicants to apply to a credentialOrg for an electronic credential.
  */
-import "./Ownable.sol";
+import "./Pausable.sol";
 import "./SafeMath32.sol";
 
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
 }
 
-contract ApplicantFactory is Ownable {
+contract ApplicantFactory is Pausable {
 
     /**
     *  @dev Library useage for safemath for uint32
@@ -100,25 +100,14 @@ contract ApplicantFactory is Ownable {
         require(_orgAddress != 0, "Applicant orgAddress can not be 0");
         CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
         if (_position < orgAddressToApplicantCount[_orgAddress] && cof.isCredentialOrg(_orgAddress)){
-            if ((orgAddressToApplicants[_orgAddress][_position].studentAddress == msg.sender || _orgAddress == msg.sender) ){
-                studentAddress = orgAddressToApplicants[_orgAddress][_position].studentAddress;
-                SSN = orgAddressToApplicants[_orgAddress][_position].SSN;
-                collegeStudentID = orgAddressToApplicants[_orgAddress][_position].collegeStudentID;
-                firstName = orgAddressToApplicants[_orgAddress][_position].firstName;
-                lastName = orgAddressToApplicants[_orgAddress][_position].lastName;
-                insertDate = orgAddressToApplicants[_orgAddress][_position].insertDate;
-                processDate = orgAddressToApplicants[_orgAddress][_position].processDate;
-                emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (SUCCESS)");
-            } else {
-                studentAddress = 0;
-                SSN = "";
-                collegeStudentID = "";
-                firstName = "";
-                lastName = "";
-                insertDate = 0;
-                processDate = 0;
-                emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (FAIL) lookup has to be credentialOrg or Applicant.");
-            }
+            studentAddress = orgAddressToApplicants[_orgAddress][_position].studentAddress;
+            SSN = orgAddressToApplicants[_orgAddress][_position].SSN;
+            collegeStudentID = orgAddressToApplicants[_orgAddress][_position].collegeStudentID;
+            firstName = orgAddressToApplicants[_orgAddress][_position].firstName;
+            lastName = orgAddressToApplicants[_orgAddress][_position].lastName;
+            insertDate = orgAddressToApplicants[_orgAddress][_position].insertDate;
+            processDate = orgAddressToApplicants[_orgAddress][_position].processDate;
+            emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (SUCCESS)");
         } else {
             studentAddress = 0;
             SSN = "";

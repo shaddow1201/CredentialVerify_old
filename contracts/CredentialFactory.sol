@@ -30,12 +30,10 @@ contract CredentialFactory is Pausable{
         uint32 credentialInsertDate;// Credential Insert timestamp
         bool isActive;              // is CredentialActive for use
     }
-    uint32 public credentialCount;
     address public credentialOrgContractAddress;
     
     // constructor
     constructor () public {
-        credentialCount = 0;
     }
     // functions
     function setAddress(address _credentialOrgContractAddress) public onlyOwner {
@@ -60,7 +58,6 @@ contract CredentialFactory is Pausable{
             require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
             uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp), true)));
             if(position >= 0){
-                credentialCount = credentialCount.add(1);
                 orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
                 orgAddressToActiveCredentialCount[msg.sender] = orgAddressToActiveCredentialCount[msg.sender].add(1);
                 emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
@@ -81,8 +78,19 @@ contract CredentialFactory is Pausable{
     public view
     returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive)
     {
-        require(_position >= 0 && _position < orgAddressToCredentialTotalCount[msg.sender], "selectCredential: Credential Bounds Error");
-        return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision, orgAddressToCredentials[_credentialOrgAddress][_position].credentialInsertDate,orgAddressToCredentials[_credentialOrgAddress][_position].isActive);
+        require(_position >= 0, "selectCredential (FAIL) position incorrect");
+        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
+        if (cof.isCredentialOrg(_credentialOrgAddress)){
+            if (_position < orgAddressToCredentialTotalCount[_credentialOrgAddress]){
+                return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision, orgAddressToCredentials[_credentialOrgAddress][_position].credentialInsertDate,orgAddressToCredentials[_credentialOrgAddress][_position].isActive);    
+            } else {
+                emit CredentialFactoryActivity(msg.sender, "", "selectCredential: Credential Bounds Error");
+                return ("","","", 0, false);
+            }
+        } else {
+            emit CredentialFactoryActivity(msg.sender, "", "selectCredential: Not CredentialOrg");
+            return ("","","", 0, false);
+        }
     }
 
     /**
