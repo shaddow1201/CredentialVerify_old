@@ -43,9 +43,9 @@ contract TestApplicantFactory {
         uint32 insertDate;            // unix timestamp.
         uint32 processDate;           // unix timestamp.
         (studentAddress, SSN, collegeStudentID, firstName, lastName, insertDate, processDate) = applicantFactory.selectApplicantByOrgAndPosition(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 5);
-        string memory expected = "0";
+        address expected = 0;
 
-        Assert.equal(SSN, expected, "InValid Applicant Lookup failed appropriately. (returned 0)");
+        Assert.equal(studentAddress, expected, "InValid Applicant Lookup failed appropriately. (returned 0)");
     }
 
     function testSelectValidApplicantByOrgAndApplicant() public {

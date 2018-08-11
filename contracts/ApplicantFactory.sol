@@ -98,46 +98,43 @@ contract ApplicantFactory is Ownable {
     returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName, uint32 insertDate,  uint32 processDate)
     {
         require(_orgAddress != 0, "Applicant orgAddress can not be 0");
-        if (orgAddressToApplicants[_orgAddress][_position].studentAddress == msg.sender || _orgAddress == msg.sender){
-            studentAddress = orgAddressToApplicants[_orgAddress][_position].studentAddress;
-            SSN = orgAddressToApplicants[_orgAddress][_position].SSN;
-            collegeStudentID = orgAddressToApplicants[_orgAddress][_position].collegeStudentID;
-            firstName = orgAddressToApplicants[_orgAddress][_position].firstName;
-            lastName = orgAddressToApplicants[_orgAddress][_position].lastName;
-            insertDate = orgAddressToApplicants[_orgAddress][_position].insertDate;
-            processDate = orgAddressToApplicants[_orgAddress][_position].processDate;
+        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
+        if (_position < orgAddressToApplicantCount[_orgAddress] && cof.isCredentialOrg(_orgAddress)){
+            if ((orgAddressToApplicants[_orgAddress][_position].studentAddress == msg.sender || _orgAddress == msg.sender) ){
+                studentAddress = orgAddressToApplicants[_orgAddress][_position].studentAddress;
+                SSN = orgAddressToApplicants[_orgAddress][_position].SSN;
+                collegeStudentID = orgAddressToApplicants[_orgAddress][_position].collegeStudentID;
+                firstName = orgAddressToApplicants[_orgAddress][_position].firstName;
+                lastName = orgAddressToApplicants[_orgAddress][_position].lastName;
+                insertDate = orgAddressToApplicants[_orgAddress][_position].insertDate;
+                processDate = orgAddressToApplicants[_orgAddress][_position].processDate;
+                emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (SUCCESS)");
+            } else {
+                studentAddress = 0;
+                SSN = "";
+                collegeStudentID = "";
+                firstName = "";
+                lastName = "";
+                insertDate = 0;
+                processDate = 0;
+                emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (FAIL) lookup has to be credentialOrg or Applicant.");
+            }
         } else {
-            emit ApplicantDetail(msg.sender, "selectApplicant (FAIL) lookup has to be credentialOrg or Applicant.");
+            studentAddress = 0;
+            SSN = "";
+            collegeStudentID = "";
+            firstName = "";
+            lastName = "";
+            insertDate = 0;
+            processDate = 0;
+            emit ApplicantDetail(msg.sender, "selectApplicant (FAIL) Applicant lookup fail, or orgAddress isn't credentialing org.");
         }
         return(studentAddress, SSN, collegeStudentID, firstName, lastName, insertDate, processDate);
     }
 
     /**
-    * @dev Allows Selection of Applicant by org and and applicant address.
-    * @param _orgAddress address of CredentialingOrg
-    * @param _applicantAddress ApplicantAddress
+    * @dev Allows Selection of Applicant Total Count.
     */
-    function selectApplicantByOrgAndApplicant(address _orgAddress, address _applicantAddress)
-    public view
-    returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName, uint32 insertDate,  uint32 processDate)
-    {
-        require(_orgAddress != 0, "Applicant Address can not be 0");
-        uint32 position = applicantAddressToApplicantPosition[_applicantAddress];
-        if (orgAddressToApplicants[_orgAddress][position].studentAddress == msg.sender || _orgAddress == msg.sender){
-            studentAddress = orgAddressToApplicants[_orgAddress][position].studentAddress;
-            SSN = orgAddressToApplicants[_orgAddress][position].SSN;
-            collegeStudentID = orgAddressToApplicants[_orgAddress][position].collegeStudentID;
-            firstName = orgAddressToApplicants[_orgAddress][position].firstName;
-            lastName = orgAddressToApplicants[_orgAddress][position].lastName;
-            insertDate = orgAddressToApplicants[_orgAddress][position].insertDate;
-            processDate = orgAddressToApplicants[_orgAddress][position].processDate;
-        } else {
-            emit ApplicantDetail(msg.sender, "selectApplicant (FAIL) lookup has to be credentialOrg or Applicant.");
-        }
-        return(studentAddress, SSN, collegeStudentID, firstName, lastName, insertDate, processDate);
-    }
-
-    
     function selectApplicantCount()
     public view 
     returns (uint32 appCount)
@@ -146,6 +143,10 @@ contract ApplicantFactory is Ownable {
         return (appCount);
     }
 
+    /**
+    * @dev Allows Selection of Applicant Count by orgAddress
+    * @param _orgAddress address of CredentialingOrg
+    */
     function selectOrgApplicantCount(address _orgAddress)
     public view 
     returns (uint32 appCount)
@@ -153,5 +154,4 @@ contract ApplicantFactory is Ownable {
         appCount = orgAddressToApplicantCount[_orgAddress];
         return (appCount);
     }
-
 }
