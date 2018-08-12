@@ -30,7 +30,7 @@ contract CredentialFactory is Pausable{
         uint32 credentialInsertDate;// Credential Insert timestamp
         bool isActive;              // is CredentialActive for use
     }
-    address public credentialOrgContractAddress;
+    address private credentialOrgContractAddress;
     
     // constructor
     constructor () public {

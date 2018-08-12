@@ -41,7 +41,7 @@ contract ApplicantFactory is Pausable {
         applicantCount = 0;
     }
     
-    address credentialOrgContractAddress;
+    address private credentialOrgContractAddress;
 
     // functions
     /**
