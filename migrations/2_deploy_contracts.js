@@ -1,23 +1,23 @@
-var CredentialOrgFactory = artifacts.require("CredentialOrgFactory");
-var CredentialFactory = artifacts.require("CredentialFactory");
-var ApplicantFactory = artifacts.require("ApplicantFactory");
-var ProcessCredentials = artifacts.require("ProcessCredentials");
+var CredentialOrgFactory = artifacts.require("CredentialOrgFactory");  
+var CredentialFactory = artifacts.require("CredentialFactory");        
+var ApplicantFactory = artifacts.require("ApplicantFactory");          
+var ProcessApplicants = artifacts.require("ProcessApplicants");      
 
- module.exports = async function(deployer, network, accounts) {
-    let aInst, bInst;
+ module.exports = async function(deployer, accounts) {
+    let aInst, bInst, cInst, dInst;
   
     await Promise.all([
       deployer.deploy(CredentialOrgFactory),
       deployer.deploy(CredentialFactory),
       deployer.deploy(ApplicantFactory),
-      deployer.deploy(ProcessCredentials)
+      deployer.deploy(ProcessApplicants)
     ]);
   
     instances = await Promise.all([
-        CredentialOrgFactory.deployed(),
-        CredentialFactory.deployed(),
-        ApplicantFactory.deployed(),
-        ProcessCredentials.deployed()
+      CredentialOrgFactory.deployed(),
+      CredentialFactory.deployed(),
+      ApplicantFactory.deployed(),
+      ProcessApplicants.deployed()
     ])
   
     aInst = instances[0];
@@ -26,9 +26,10 @@ var ProcessCredentials = artifacts.require("ProcessCredentials");
     dInst = instances[3];
   
     results = await Promise.all([
+      aInst.createCredentialOrg("INITRECORD", "Test School Name", 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB),
       bInst.setAddress(aInst.address),
       cInst.setAddress(aInst.address),
-      bInst.createCredential("A", "AAAA", "BA-Arts"),
+      //bInst.createCredential("A", "AAAA", "BA-Arts"),
       dInst.setAddress(aInst.address, bInst.address, cInst.address)
     ]);
   

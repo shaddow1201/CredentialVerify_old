@@ -7,48 +7,33 @@ import "../contracts/CredentialFactory.sol";
 contract TestCredentialFactory {
     CredentialFactory credentialFactory = CredentialFactory(DeployedAddresses.CredentialFactory());
 
+    function testSelectValidOrgCredentialCount() public {
+        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
+        uint256 expected = 0;
+        Assert.equal(testVal, expected, "Expected Credential Count (1)");
+    }
+
     function testCreateCredential() public {
-        credentialFactory.createCredential("A","AAAA","AAAAA");
-        string memory credentialLevel;
-        string memory credentialTitle;
-        string memory credentialDivision; 
-        uint32 credentialInsertDate;
-        bool isActive;
-
-        (credentialLevel, credentialTitle, credentialDivision, credentialInsertDate, isActive) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
-
-        Assert.isTrue(isActive, "Valid isActive Test.");
+        bool insertSuccess = credentialFactory.createCredential("A","AAAA","AAAAA");
+        Assert.isTrue(insertSuccess, "testCreateCredential Insert Success");
     }
 
-
-    function testIsActiveValid() public {
-        bool r = credentialFactory.isCredentialActive(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
-        Assert.isTrue(r, "Valid isActive Test.");
-    }
-
-    function testIsActiveInvalid() public {
-        bool r = credentialFactory.isCredentialActive(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 5);
-        Assert.isFalse(r, "Outside Range IsActive Test");
-    }
-    function testSelectOrgCredentialCount() public {
+    function testSelectIncreasedValidOrgCredentialCount() public {
         uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
         uint256 expected = 1;
         Assert.equal(testVal, expected, "Expected Credential Count (1)");
     }
-    function testSelectOrgCredentialActiveCount() public {
-        uint256 testVal = uint256(credentialFactory.selectOrgCredentialActiveCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
-        uint256 expected = 1;
+
+    function testSelectInvalidOrgCredentialCount() public {
+        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(0x839c18df17236382f8832d9Ab5ef3FaCAFBAC891));
+        uint256 expected = 0;
         Assert.equal(testVal, expected, "Expected Credential Count (1)");
     }
 
     function testSelectCredential() public {
         string memory credentialLevel;
-        string memory credentialTitle;
-        string memory credentialDivision; 
-        uint32 credentialInsertDate;
-        bool isActive;
 
-        (credentialLevel, credentialTitle, credentialDivision, credentialInsertDate, isActive) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
+        (credentialLevel, , ) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
         string memory expected = "A";
 
         Assert.equal(credentialLevel,expected,"Credential Division Matches Expected (A)");
