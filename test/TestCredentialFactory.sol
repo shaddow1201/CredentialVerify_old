@@ -8,9 +8,10 @@ contract TestCredentialFactory {
     CredentialFactory credentialFactory = CredentialFactory(DeployedAddresses.CredentialFactory());
 
     function testSelectValidOrgCredentialCount() public {
-        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
+        address owner = credentialFactory.getOwner();
+        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(owner));
         uint256 expected = 0;
-        Assert.equal(testVal, expected, "Expected Credential Count (1)");
+        Assert.equal(testVal, expected, "Expected Credential Count (0)");
     }
 
     function testCreateCredential() public {
@@ -19,7 +20,8 @@ contract TestCredentialFactory {
     }
 
     function testSelectIncreasedValidOrgCredentialCount() public {
-        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
+        address owner = credentialFactory.getOwner();
+        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(owner));
         uint256 expected = 1;
         Assert.equal(testVal, expected, "Expected Credential Count (1)");
     }
@@ -31,9 +33,10 @@ contract TestCredentialFactory {
     }
 
     function testSelectCredential() public {
+        address owner = credentialFactory.getOwner();
         string memory credentialLevel;
 
-        (credentialLevel, , ) = credentialFactory.selectCredential(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
+        (credentialLevel, , ) = credentialFactory.selectCredential(owner, 0);
         string memory expected = "A";
 
         Assert.equal(credentialLevel,expected,"Credential Division Matches Expected (A)");

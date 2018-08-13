@@ -35,7 +35,7 @@ contract CredentialOrgFactory is Pausable {
     * @dev Primary CredentialOrg structure, and following array.
     */
     struct CredentialOrg {
-        string shortName;  // School shortName (len 30)
+        string shortName;          // School shortName (len 30)
         string officialSchoolName; // official school shortName (70 or less)
         address schoolAddress;
     }
@@ -47,6 +47,7 @@ contract CredentialOrgFactory is Pausable {
     */
     constructor() public {
         credentialOrgCount = 0;
+        createCredentialOrg("INITRECORD", "BASE INIT RECORD", owner);
     }
     
     /**
@@ -54,6 +55,7 @@ contract CredentialOrgFactory is Pausable {
     * @param _shortName shortName of Credentialing orgs
     * @param _officialSchoolName official School Name
     * @param _schoolAddress address of credential org.
+    * @return createStatus bool noting creation status success or failure
     */
     function createCredentialOrg(string _shortName, string _officialSchoolName, address _schoolAddress) 
     public 
@@ -64,7 +66,6 @@ contract CredentialOrgFactory is Pausable {
         require(bytes(_officialSchoolName).length > 0 && bytes(_officialSchoolName).length < 70, "createCredentialOrg officalSchoolName length problem");
         require(_schoolAddress != 0, "createCredentialOrg (FAIL) school Address can not be 0");
         createStatus = false;
-
         uint32 position = uint32(credentialOrgs.push(CredentialOrg(_shortName, _officialSchoolName, _schoolAddress)));
         if (position > 0){
             addressToCredentialOrg[_schoolAddress] = credentialOrgs[position.sub(1)];
@@ -80,9 +81,12 @@ contract CredentialOrgFactory is Pausable {
     /**
     * @dev allows selection of a credentialingOrg by position
     * @param _credentialOrgPosition allows selection of credentialing orgs details.
+    * @return shortName - shortName of Credential Org
+    * @return officialSchooName - official school name
+    * @return school -the schools ethereum address 
     */
     function selectCredentialOrgByPosition(uint32 _credentialOrgPosition) 
-    public view
+    public view 
     returns (string shortName, string officialSchoolName, address schoolAddress)
     {
         shortName = "";
@@ -101,9 +105,12 @@ contract CredentialOrgFactory is Pausable {
     /**
     * @dev allows selection of a credentialingOrg by address
     * @param _credentialOrgAddress allows selection of credentialing orgs details.
+    * @return shortName - shortName of Credential Org
+    * @return officialSchooName - official school name
+    * @return school -the schools ethereum address 
     */
     function selectCredentialOrgByAddress(address _credentialOrgAddress) 
-    public view
+    public view 
     returns (string shortName, string officialSchoolName, address schoolAddress)
     {
         require(_credentialOrgAddress != 0, "selectCredentialOrg - Address 0 not valid");
@@ -120,24 +127,26 @@ contract CredentialOrgFactory is Pausable {
     /**
     * @dev allows checking if credentialOrg exists
     * @param _credentialOrgAddress function returns bool if an address is a credentialingOrg
+    * @return isAddress returns true if address is Credentialing Org, false if not.
     */
     function isCredentialOrg(address _credentialOrgAddress) 
     public view
-    returns (bool IsOrgAddress)
+    returns (bool isOrgAddress)
     {
-        IsOrgAddress = false;
+        isOrgAddress = false;
         CredentialOrg memory testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
         if (testCredentialOrg.schoolAddress != 0){
-            IsOrgAddress = true;
+            isOrgAddress = true;
             emit CredentialOrgEvent(msg.sender, "isCredentialOrg - (SUCCESS)");
         } else {
             emit CredentialOrgEvent(msg.sender, "isCredentialOrg - (FAIL)");
         }
-        return (IsOrgAddress);
+        return (isOrgAddress);
     }
 
     /**
     * @dev returns the credentialOrgCount
+    * @return returnOrgCount - returns the total credential orgs count
     */
     function selectOrgCount()
     public view

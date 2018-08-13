@@ -26,10 +26,9 @@ var ProcessApplicants = artifacts.require("ProcessApplicants");
     dInst = instances[3];
   
     results = await Promise.all([
-      aInst.createCredentialOrg("INITRECORD", "Test School Name", 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB),
       bInst.setAddress(aInst.address),
       cInst.setAddress(aInst.address),
-      //bInst.createCredential("A", "AAAA", "BA-Arts"),
+      //bInst.createCredential("TESTRECA", "AAAA", "AAAAAA"),
       dInst.setAddress(aInst.address, bInst.address, cInst.address)
     ]);
   
