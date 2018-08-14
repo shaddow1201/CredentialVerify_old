@@ -55,8 +55,14 @@ contract ApplicantFactory is Pausable {
         _;
     }
 
-
     // functions
+    function getOwner()
+    public view
+    returns (address returnedOwner)
+    {
+        returnedOwner = owner;
+    }
+
     /**
     * @dev Allows owner to set address of CredentialOrgFactory contract.
     * @param _credentialOrgContractAddress address of CredentialOrgFactory (set on deploy).

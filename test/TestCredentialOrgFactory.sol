@@ -8,6 +8,17 @@ contract TestCredentialOrgFactory {
     CredentialOrgFactory credentialOrgFactory = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
 
     /**
+    * @dev Checks Owner address vs expected
+    */
+    function testCheckContractOwner() public {
+
+        address contractOwner = credentialOrgFactory.getOwner();
+        address expected = 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB;
+
+        Assert.equal(contractOwner, expected, "Check Owner");
+    }
+
+    /**
     * @dev Tests to see if INIT record was created upon deploy.
     */
     function testSelectCredentialOrgCount() public {
@@ -21,7 +32,7 @@ contract TestCredentialOrgFactory {
     /**
     * @dev Tests to see if INIT record values were set correctly.
     */
-    function testSelectCredentialOrgBeforeNewInsert() public {
+    function testSelectCredentialOrgTestRecord() public {
 
         string memory shortName;
         (shortName, , ) = credentialOrgFactory.selectCredentialOrgByPosition(0);
@@ -45,9 +56,9 @@ contract TestCredentialOrgFactory {
     }
 
     /*
-    * @dev Test to see credentialing ord data was set correctly.
+    * @dev Test to see newly inserted credentialing ord data was set correctly.
     */
-    function testSelectCredentialOrgAfterNewInsert() public {
+    function testSelectCredentialOrgDataOnNewInsert() public {
 
         string memory shortName;
         (shortName, , ) = credentialOrgFactory.selectCredentialOrgByPosition(1);
@@ -56,8 +67,20 @@ contract TestCredentialOrgFactory {
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
     }
 
+    /**
+    * @dev Tests to see if INIT record was created upon deploy.
+    */
+    function testSelectCredentialOrgCountAfterInsert() public {
+
+        uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
+        uint256 expected = 2;
+
+        Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
+    }
+
+
     /*
-    * @dev Test to see credentialing ord data was set correctly.
+    * @dev Test to see credentialing ord data from wrong bad position returns blanks and zeros.
     */
     function testSelectCredentialOrgInvalidPosition() public {
 
@@ -70,24 +93,12 @@ contract TestCredentialOrgFactory {
 
 
     /*
-    * @dev Test to see if invalid credentialling org IS a credentialling org (should return false)
+    * @dev Test to see if invalid credentialling org address IS a credentialling org (should return false)
     */
     function testisCredentialOrgInValid() public {
 
         bool testVal = credentialOrgFactory.isCredentialOrg(0x1eC2c24e0110a0c0C4e0E03e694dBC95cd825162);
         Assert.isFalse(testVal, "Base Inserted Test Org Valid");
-    }
-
-    /*
-    * @dev Test to see if valid credentialling org IS a credentialling org (should return true)
-    */
-    function testIsCredentialOrgValidByPosition() public {
-
-        address schoolAddress;
-        ( , , schoolAddress) = credentialOrgFactory.selectCredentialOrgByPosition(0);
-        bool testVal = credentialOrgFactory.isCredentialOrg(schoolAddress);
-
-        Assert.isTrue(testVal, "Credential Org Valid");
     }
 
     /*

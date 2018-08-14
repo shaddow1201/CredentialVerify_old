@@ -31,23 +31,37 @@ contract CredentialFactory is Pausable{
     
     // constructor
     constructor () public {
-        //createCredential("TESTREC", "AAAA", "AAAAAA");
+        createCredential("TESTREC", "AAAA", "AAAAAA");
+    }
+
+    // modifiers
+    /**
+    * @dev Modifer onlyBy for Access Control
+    */
+    modifier onlyBy(address _credentialOrgAddress){
+        uint32 foundAccount = 0;
+        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
+        if (cof.isCredentialOrg(_credentialOrgAddress)){
+            foundAccount = 1;
+        }
+        require(foundAccount == 1, "Not Credentialing Org");
+        _;
     }
 
     // functions
+    function getOwner()
+    public view
+    returns (address returnedOwner)
+    {
+        returnedOwner = owner;
+    }
+
     /**
     * @dev allows credentialing Orgs to create new credentials
     * @param _credentialOrgContractAddress Address of CredentialOrgFactory Contract.
     */
     function setAddress(address _credentialOrgContractAddress) public onlyOwner {
         credentialOrgContractAddress = _credentialOrgContractAddress;
-    }
-
-    function getOwner()
-    public
-    returns (address returnedOwner)
-    {
-        returnedOwner = owner;
     }
 
     /**
@@ -58,7 +72,7 @@ contract CredentialFactory is Pausable{
     * @return insertStatus - true false if insert happened.
     */
     function createCredential(string _credentialLevel, string _credentialTitle, string _credentialDivision) 
-    public //onlyBy(msg.sender)
+    public 
     returns (bool insertStatus)
     {
         emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (ATTEMPT)");
@@ -91,7 +105,7 @@ contract CredentialFactory is Pausable{
     * @return credentialDivision - credential org division for credential.
     */
     function selectCredential(address _credentialOrgAddress, uint32 _position) 
-    public view 
+    public view
     returns (string credentialLevel, string credentialTitle, string credentialDivision)
     {
         require(_position >= 0, "selectCredential (FAIL) position incorrect");

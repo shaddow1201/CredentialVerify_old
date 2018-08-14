@@ -50,6 +50,14 @@ contract CredentialOrgFactory is Pausable {
         createCredentialOrg("INITRECORD", "BASE INIT RECORD", owner);
     }
     
+    // functions
+    function getOwner()
+    public view
+    returns (address returnedOwner)
+    {
+        returnedOwner = owner;
+    }
+
     /**
     * @dev allows owner to create new credentialing orgs
     * @param _shortName shortName of Credentialing orgs
