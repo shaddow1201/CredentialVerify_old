@@ -21,7 +21,13 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 1. Copy files to CredentialVerify Directory
-2. Compile truffle
+2. run ganache-cli with following mnemonic "delay film punch stool adult expect bulb grab clinic lawsuit clown amused"
+
+```
+ganache-cli -port 8545 -m "delay film punch stool adult expect bulb grab clinic lawsuit clown amused"
+```
+
+3. Compile truffle
 
 ```
 truffle compile
@@ -61,16 +67,5 @@ Give an example
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Richard Noordam ** 
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
