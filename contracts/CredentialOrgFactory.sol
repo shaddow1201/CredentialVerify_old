@@ -66,7 +66,7 @@ contract CredentialOrgFactory is Pausable {
     * @return createStatus bool noting creation status success or failure
     */
     function createCredentialOrg(string _shortName, string _officialSchoolName, address _schoolAddress) 
-    public 
+    public onlyOwner
     returns (bool createStatus)
     {
         emit CredentialOrgCreateEvent(_shortName, _schoolAddress, "New Org Add (PRE)");
