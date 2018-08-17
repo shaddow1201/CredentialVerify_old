@@ -42,7 +42,7 @@ var ProcessApplicants = artifacts.require("ProcessApplicants");
       cInst.setAddress(aInst.address),
       cInst.createApplicant(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, "123456789", "987654321", "TESTAPPLICANT", "TESTAPPLICANT"),
       // Set Address of dInst so it can point at aInst, bInst, and cInst
-      dInst.setAddress(aInst.address, bInst.address, cInst.address),
+      dInst.setAddress(aInst.address, bInst.address, cInst.address)
       //dInst.createApplicantCredential(0)
     ]);
 

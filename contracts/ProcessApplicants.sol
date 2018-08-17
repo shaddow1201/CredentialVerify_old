@@ -7,6 +7,7 @@ import "./Pausable.sol";
 import "./SafeMath32.sol";
 
 // Allows interface between Process Credentials and CredentialOrgFactory.
+// not used at this time, will be when testing moves to Javascript.
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
 }
@@ -15,7 +16,6 @@ interface CredentialOrgFactory{
 interface CredentialFactory{
     function selectOrgCredentialCount(address _credentialOrgAddress) external view returns (uint32 returnCredentialCount);
     function selectCredential(address _credentialOrgAddress, uint32 _position) external view returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive);
-    function isCredentialActive(address _credentialOrgAddress, uint _position) external view returns (bool activeState);
 }
 
 // Allows interface between Process Credentials and ApplicantFactory.
@@ -77,6 +77,17 @@ contract ProcessApplicants is Pausable {
 
     // functions
     /**
+    * @dev Gets Owner Address of Contract
+    * @return returnedOwner returns owner of contract address.
+    */
+    function getOwner()
+    public view
+    returns (address returnedOwner)
+    {
+        returnedOwner = owner;
+    }
+
+    /**
     * @dev Allows owner to set addresses needed for ProcessCredentials contract.
     * @param _credentialOrgContractAddress address of CredentialOrgFactory (set on deploy).
     * @param _credentialContractAddress address of CredentialFactory (set on deploy).
@@ -91,17 +102,7 @@ contract ProcessApplicants is Pausable {
             applicantFatoryAddress = _applicantContractAddress;
         }
     }    
-    /**
-    * @dev Allows credentialOrg to set where they want to begin processing Applicants (int=0)
-    * @param _position address of CredentialOrgFactory (set on deploy).
-    */
-    function setCredentialOrgApplicantPosition (uint32 _position)
-    public 
-    {
-        require(_position >= 0,"setCredentialOrgApplicantPosition (FAIL) Position must be 0 or greater.");
-        credentailOrgToApplicantPosition[msg.sender] = _position;
-        emit ProcessCredentialDetail (msg.sender, "setCredentialOrgApplicantPosition (SUCCESS)");
-    }
+
     /**
     * @dev Allows credentialOrg to select next Applicant (or sends back blank of not available/error)
     */
@@ -123,6 +124,11 @@ contract ProcessApplicants is Pausable {
         return (studentAddress, SSN, collegeStudentID, firstName, lastName, insertDate);
     }
 
+    /**
+    * @dev allows the creation of an applicantCredential
+    * @param _credentialPosition position of credential in CredentialOrgs Credentials
+    * @return insertSuccess true/false 
+    */
     function createApplicantCredential(uint32 _credentialPosition)
     public 
     returns (bool insertSuccess)
@@ -140,31 +146,32 @@ contract ProcessApplicants is Pausable {
         if (position > 0){
             insertStatus = true;
         }
-        bool updateStatus = updateApplicant("AWARDED");
-        if (updateStatus && insertStatus){
-            insertSuccess = true;
+        af = ApplicantFactory(applicantFatoryAddress);
+        bool updateStatus = false;
+        if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
+            updateStatus = af.updateApplicantByOrgAndPosition(credentailOrgToApplicantPosition[msg.sender], "AWARDED");
+        } else {
+            updateStatus = false;
+            emit ProcessCredentialDetail (msg.sender, "createApplicantCredential (FAIL) failure.");
         }
         return (insertSuccess);
     }
 
+    /**
+    * @dev allows credentialOrg to deny applicant.
+    * @return true/false on update
+    */
     function denyApplicantCredential()
-    public onlyBy(msg.sender)
-    returns (bool updateStatus)
-    {
-        updateStatus = updateApplicant("DENIED");
-        return (updateStatus);
-    }
-
-    function updateApplicant (string _status)
-    internal 
+    public
     returns (bool updateStatus)
     {
         ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
         if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
-            updateStatus = af.updateApplicantByOrgAndPosition(credentailOrgToApplicantPosition[msg.sender], _status);
+            updateStatus = af.updateApplicantByOrgAndPosition(credentailOrgToApplicantPosition[msg.sender], "DENIED");
         } else {
             updateStatus = false;
             emit ProcessCredentialDetail (msg.sender, "denyApplicantCredential (FAIL) credentialOrgToApplicantPosition failure.");
         }
+        return (updateStatus);
     }
 }
