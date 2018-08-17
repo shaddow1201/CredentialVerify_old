@@ -118,6 +118,11 @@ contract ApplicantFactory is Pausable {
     * @dev Allows Selection of Applicant by org and position.
     * @param _orgAddress address of CredentialingOrg
     * @param _position position in array of Applicant
+    * @return Applicants student's ether address
+    * @return SSN Applicants SSN
+    * @return collegeStudentID  Applicant college ID
+    * @return firstName Applicant firstName
+    * @return lastName Applicant lastName
     */
     function selectApplicantByOrgAndPosition(address _orgAddress, uint32 _position)
     public view 
@@ -146,21 +151,23 @@ contract ApplicantFactory is Pausable {
     * @dev Allows Selection of Applicant by org and position.
     * @param _position position in array of Applicant
     * @param _processDetail Applicant AWARDED/DENIED
+    * @return updateSuccess true/false
     */
     function updateApplicantByOrgAndPosition(uint32 _position, string _processDetail)
     public 
     returns (bool updateSuccess)
     {
         updateSuccess = false;
-        require(_position >= 0, "Applicant position requires >= 0");
-        require(bytes(_processDetail).length >= 0 && bytes(_processDetail).length >= 10, "Applicant position requires >= 0");
+        emit ApplicantDetail(msg.sender, "updateApplicantByOrgAndPosition (ATTEMPT)");
+        require(_position >= 0, "updateApplicantByOrgAndPosition: Applicant position requires >= 0");
+        require(bytes(_processDetail).length >= 0 && bytes(_processDetail).length <= 10, "updateApplicantByOrgAndPosition: Applicant Process Detail Missing");
         if (_position < orgAddressToApplicantCount[msg.sender]){
             orgAddressToApplicants[msg.sender][_position].processDate = uint32(block.timestamp);
             orgAddressToApplicants[msg.sender][_position].processDetail = _processDetail;
             updateSuccess = true;
-            emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (SUCCESS)");
+            emit ApplicantDetail(msg.sender, "updateApplicantByOrgAndPosition (SUCCESS)");
         } else {
-            emit ApplicantDetail(msg.sender, "selectApplicantByOrgAndPosition (FAIL) invalid position");
+            emit ApplicantDetail(msg.sender, "updateApplicantByOrgAndPosition (FAIL) invalid position");
         }
         return(updateSuccess);
     }
@@ -168,6 +175,7 @@ contract ApplicantFactory is Pausable {
     /**
     * @dev Allows Selection of Applicant Count by orgAddress
     * @param _orgAddress address of CredentialingOrg
+    * @return appCount the Applicant Count for a specific organization.
     */
     function selectOrgApplicantCount(address _orgAddress)
     public view 

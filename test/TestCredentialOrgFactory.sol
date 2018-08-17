@@ -24,7 +24,7 @@ contract TestCredentialOrgFactory {
     function testSelectCredentialOrgCount() public {
 
         uint256 orgCount = uint256(credentialOrgFactoryA.selectOrgCount());
-        uint256 expected = 2;
+        uint256 expected = 1;
 
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
