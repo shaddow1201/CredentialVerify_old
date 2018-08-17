@@ -4,13 +4,13 @@ var ApplicantFactory = artifacts.require("ApplicantFactory");
 var ProcessApplicants = artifacts.require("ProcessApplicants");      
 
  module.exports = async function(deployer) {
-    let aInst, bInst, cInst, dInst;
+    let safeMathInst, aInst, bInst, cInst, dInst;
   
     await Promise.all([
       deployer.deploy(CredentialOrgFactory),
       deployer.deploy(CredentialFactory),
       deployer.deploy(ApplicantFactory),
-      deployer.deploy(ProcessApplicants)
+      deployer.deploy(ProcessApplicants),
     ]);
   
     instances = await Promise.all([
@@ -30,10 +30,10 @@ var ProcessApplicants = artifacts.require("ProcessApplicants");
       aInst.createCredentialOrg("INITRECORD", "BASE INIT RECORD", 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB),
       // Grant access to all contracts (for isCredentialOrg)  
       // this doesn't quite acomplish what i'm trying to get done... as modifer onlyBy(msg.sender) still fails..
-      //aInst.createCredentialOrg("CREDENTIALORG", "CREDENTIALORGFACTORY", aInst.address),
-      //aInst.createCredentialOrg("CREDENTIAL", "CREDENTIALFACTORY", bInst.address),
-      //aInst.createCredentialOrg("APPLICANT", "APPLICANTFACTORY", cInst.address),
-      //aInst.createCredentialOrg("PROCESS", "PROCESSAPPLICANTS", dInst.address),
+      aInst.createCredentialOrg("CREDENTIALORG", "CREDENTIALORGFACTORY", aInst.address),
+      aInst.createCredentialOrg("CREDENTIAL", "CREDENTIALFACTORY", bInst.address),
+      aInst.createCredentialOrg("APPLICANT", "APPLICANTFACTORY", cInst.address),
+      aInst.createCredentialOrg("PROCESS", "PROCESSAPPLICANTS", dInst.address),
       
       // Set Address of bInst so it can point at aInst
       bInst.setAddress(aInst.address),

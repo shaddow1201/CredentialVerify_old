@@ -120,6 +120,7 @@ contract ProcessApplicants is Pausable {
     {
         if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
             (studentAddress, SSN, collegeStudentID, firstName, lastName) = af.selectApplicantByOrgAndPosition(msg.sender, credentailOrgToApplicantPosition[msg.sender]);
+            credentailOrgToApplicantPosition[msg.sender] = credentailOrgToApplicantPosition[msg.sender].add(1);
         } else {
             studentAddress = 0;
             SSN = "";
