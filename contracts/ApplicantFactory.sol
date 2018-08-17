@@ -48,14 +48,23 @@ contract ApplicantFactory is Pausable {
     modifier onlyBy(address _credentialOrgAddress){
         uint32 foundAccount = 0;
         CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (cof.isCredentialOrg(msg.sender)){
+        if (_credentialOrgAddress == address(this)){
             foundAccount = 1;
+        }
+        if (foundAccount == 0){
+            if (cof.isCredentialOrg(msg.sender)){
+                foundAccount = 1;
+            }
         }
         if (foundAccount == 0) revert("Not Authorized CredentialOrg");
         _;
     }
 
     // functions
+    /**
+    * @dev Gets Owner Address of Contract
+    * @return returnedOwner returns owner of contract address.
+    */
     function getOwner()
     public view
     returns (address returnedOwner)
@@ -80,9 +89,11 @@ contract ApplicantFactory is Pausable {
     * @param _collegeStudentID College Student ID
     * @param _firstName First Name of Student
     * @param _lastName Last Name of Student
+    * @return insertSuccess true/false of 
     */
     function createApplicant(address _collegeAddress, string _SSN, string _collegeStudentID, string _firstName, string _lastName) 
     public 
+    returns (bool insertSuccess)
     {
         emit CreateNewApplicant(msg.sender, 0, "createApplicant (ATTEMPT)");
         require(msg.sender != 0 && _collegeAddress != 0, "createApplicant (FAIL) Addresses can not be 0.");
@@ -90,15 +101,17 @@ contract ApplicantFactory is Pausable {
         require(bytes(_collegeStudentID).length == 9, "createApplicant (FAIL)College StudentID length Problem");
         require(bytes(_firstName).length > 0 && bytes(_firstName).length <= 40, "createApplicant (FAIL) FirstName length problem"); 
         require(bytes(_lastName).length > 0 && bytes(_lastName).length <= 40, "createApplicant (FAIL) LastName length problem"); 
-
+        insertSuccess = false;
         uint32 position = uint32(orgAddressToApplicants[_collegeAddress].push(Applicant(msg.sender, _SSN, _collegeStudentID, _firstName, _lastName, uint32(block.timestamp), 0, "")));
         if(position >= 0){
+            insertSuccess = true;
             applicantAddressToApplicantPosition[msg.sender] = position.sub(1);
             orgAddressToApplicantCount[_collegeAddress] = orgAddressToApplicantCount[_collegeAddress].add(1);
             emit CreateNewApplicant(msg.sender, 0, "createApplicant (SUCCESS)");
         } else {
             emit CreateNewApplicant(msg.sender, 0, "createApplicant (FAIL)");
         }
+        return (insertSuccess);
     }
 
     /**
@@ -107,12 +120,11 @@ contract ApplicantFactory is Pausable {
     * @param _position position in array of Applicant
     */
     function selectApplicantByOrgAndPosition(address _orgAddress, uint32 _position)
-    public view onlyBy(msg.sender)
+    public view 
     returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName)
     {
         require(_orgAddress != 0, "Applicant orgAddress can not be 0");
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (_position < orgAddressToApplicantCount[_orgAddress] && cof.isCredentialOrg(_orgAddress)){
+        if (_position < orgAddressToApplicantCount[_orgAddress]){
             studentAddress = orgAddressToApplicants[_orgAddress][_position].studentAddress;
             SSN = orgAddressToApplicants[_orgAddress][_position].SSN;
             collegeStudentID = orgAddressToApplicants[_orgAddress][_position].collegeStudentID;
@@ -125,7 +137,7 @@ contract ApplicantFactory is Pausable {
             collegeStudentID = "";
             firstName = "";
             lastName = "";
-            emit ApplicantDetail(msg.sender, "selectApplicant (FAIL) Applicant lookup fail, or orgAddress isn't credentialing org.");
+            emit ApplicantDetail(msg.sender, "selectApplicant (FAIL) Applicant lookup fail");
         }
         return(studentAddress, SSN, collegeStudentID, firstName, lastName);
     }
@@ -136,7 +148,7 @@ contract ApplicantFactory is Pausable {
     * @param _processDetail Applicant AWARDED/DENIED
     */
     function updateApplicantByOrgAndPosition(uint32 _position, string _processDetail)
-    public onlyBy(msg.sender)
+    public 
     returns (bool updateSuccess)
     {
         updateSuccess = false;
@@ -158,7 +170,7 @@ contract ApplicantFactory is Pausable {
     * @param _orgAddress address of CredentialingOrg
     */
     function selectOrgApplicantCount(address _orgAddress)
-    public view onlyBy(msg.sender)
+    public view 
     returns (uint32 appCount)
     {
         appCount = orgAddressToApplicantCount[_orgAddress];

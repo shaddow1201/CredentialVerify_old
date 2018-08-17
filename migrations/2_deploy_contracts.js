@@ -1,6 +1,6 @@
 var CredentialOrgFactory = artifacts.require("CredentialOrgFactory");  
 var CredentialFactory = artifacts.require("CredentialFactory");        
-//var ApplicantFactory = artifacts.require("ApplicantFactory");          
+var ApplicantFactory = artifacts.require("ApplicantFactory");          
 //var ProcessApplicants = artifacts.require("ProcessApplicants");      
 
  module.exports = async function(deployer, accounts) {
@@ -9,21 +9,21 @@ var CredentialFactory = artifacts.require("CredentialFactory");
   
     await Promise.all([
       deployer.deploy(CredentialOrgFactory),
-      deployer.deploy(CredentialFactory)
-//      deployer.deploy(ApplicantFactory),
+      deployer.deploy(CredentialFactory),
+      deployer.deploy(ApplicantFactory)
 //      deployer.deploy(ProcessApplicants)
     ]);
   
     instances = await Promise.all([
       CredentialOrgFactory.deployed(),
-      CredentialFactory.deployed()
-      //ApplicantFactory.deployed(),
+      CredentialFactory.deployed(),
+      ApplicantFactory.deployed()
       //ProcessApplicants.deployed()
     ])
   
     aInst = instances[0];
     bInst = instances[1];
-    //cInst = instances[2];
+    cInst = instances[2];
     //dInst = instances[3];
     aAccount = accounts[0];
   
@@ -32,8 +32,8 @@ var CredentialFactory = artifacts.require("CredentialFactory");
       bInst.setAddress(aInst.address),
       console.log(aInst.address),
       aInst.createCredentialOrg("CREDENTIAL", "CREDENTIAL CONTRACT", bInst.address),
-      //bInst.createCredential("TESTREC", "AAAA", "AAAAAA")
-      //cInst.setAddress(aInst.address),
+      cInst.setAddress(aInst.address),
+      aInst.createCredentialOrg("APPLICANT", "APPLICANT CONTRACT", cInst.address)
       //dInst.setAddress(aInst.address, bInst.address, cInst.address)
     ]);
 

@@ -5,26 +5,38 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/ApplicantFactory.sol";
 
 contract TestApplicantFactory {
-    ApplicantFactory applicantFactory = ApplicantFactory(DeployedAddresses.ApplicantFactory());
+    ApplicantFactory applicantFactoryA = ApplicantFactory(DeployedAddresses.ApplicantFactory());
+    ApplicantFactory applicantFactoryB = new ApplicantFactory();
 
-    function testCreateApplicant() public {
-        applicantFactory.createApplicant(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, "519139038", "101000942", "Richard", "Noordam");
-        uint256 testVal = uint256(applicantFactory.selectOrgApplicantCount(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB));
-        uint256 expected = 1;
+    function testCreateApplicantDeployed() public {
+        bool insertSuccess = applicantFactoryA.createApplicant(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, "987654321", "222222222", "Richard", "Noordam");
 
-        Assert.equal(testVal, expected, "Expected Credential Count (0)");
+        Assert.isTrue(insertSuccess, "Test Insert Successful (True)");
     }
 
-    function testselectValidApplicantByOrgAndPosition() public {
+    function testSelectValidApplicantByOrgAndPosition() public {
         string memory SSN;                 // Applicant SSN
-        (, SSN, , , ) = applicantFactory.selectApplicantByOrgAndPosition(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
+        (, SSN, , , ) = applicantFactoryA.selectApplicantByOrgAndPosition(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 0);
         string memory expected = "519139038";
 
         Assert.equal(SSN, expected, "Valid Applicant Lookup Successful.");
     }
+
+    function testCreateApplicantLocalTest() public {
+        bool insertSuccess = applicantFactoryA.createApplicant(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, "123456789", "111111111", "Some", "Body");
+
+        Assert.isTrue(insertSuccess, "Test Insert Successful (True)");
+    }
+
+    function testUpdateApplicantByOrgAndPosition() public {
+        bool updateSuccess = applicantFactoryB.updateApplicantByOrgAndPosition(0, "APPROVED");
+
+        Assert.isTrue(updateSuccess, "Record Update Successful (True)");
+    }
+
     function testselectInValidApplicantByOrgAndPosition() public {
         address studentAddress;     // address of student requesting credential
-        (studentAddress, , , , ) = applicantFactory.selectApplicantByOrgAndPosition(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 5);
+        (studentAddress, , , , ) = applicantFactoryA.selectApplicantByOrgAndPosition(0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB, 5);
         address expected = 0;
 
         Assert.equal(studentAddress, expected, "InValid Applicant Lookup failed appropriately. (returned 0)");
