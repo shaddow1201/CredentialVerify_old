@@ -6,25 +6,27 @@ pragma solidity ^0.4.21;
 import "./Pausable.sol";
 import "./SafeMath32.sol";
 
+// allows communication with CredentialOrg Factory.
+// not used, will be when testing moves to Javascript.
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
 }
 
 contract ApplicantFactory is Pausable {
 
-    /**
-    *  @dev Library useage for safemath for uint32
-    */
+    // SafeMath32 Library Usage
     using SafeMath32 for uint32;
 
+    // contract events.
     event CreateNewApplicant(address ApplicantAddress, uint32 position, string detail);
     event ApplicantDetail(address ApplicantCallerAddress, string detail);
     
-    
+    // mappings
     mapping (address => Applicant[]) orgAddressToApplicants;
     mapping (address => uint32) orgAddressToApplicantCount;
     mapping (address => uint32) applicantAddressToApplicantPosition;
     
+    // structs
     struct Applicant {
         address studentAddress;     // address of student requesting credential
         string SSN;                 // Applicant SSN
@@ -35,10 +37,13 @@ contract ApplicantFactory is Pausable {
         uint32 processDate;         // unix timestamp.
         string processDetail;       // AWARDED/DENIED
     }
-    
+    /**
+    * @dev constructor.
+     */
     constructor() public {
     }
     
+    // address of CredentialOrgFactory.
     address private credentialOrgContractAddress;
 
     // modifiers
@@ -48,17 +53,13 @@ contract ApplicantFactory is Pausable {
     modifier onlyBy(address _credentialOrgAddress){
         uint32 foundAccount = 0;
         CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (_credentialOrgAddress == address(this)){
+        if (cof.isCredentialOrg(msg.sender)){
             foundAccount = 1;
-        }
-        if (foundAccount == 0){
-            if (cof.isCredentialOrg(msg.sender)){
-                foundAccount = 1;
-            }
         }
         if (foundAccount == 0) revert("Not Authorized CredentialOrg");
         _;
     }
+
 
     // functions
     /**
@@ -154,7 +155,7 @@ contract ApplicantFactory is Pausable {
     * @return updateSuccess true/false
     */
     function updateApplicantByOrgAndPosition(uint32 _position, string _processDetail)
-    public 
+    public //onlyBy(msg.sender)
     returns (bool updateSuccess)
     {
         updateSuccess = false;

@@ -5,15 +5,19 @@ import "./SafeMath32.sol";
  * @title CredentialFactory
  * @dev The CredentialFactory allows the credentialOrgs to add/lookup credentials
  */
+
+// allows interaction with CredentialOrgFactory.
+// not used, but will be when testing moves to Javascript.
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
-    function createCredentialOrg(string _shortName, string _officialSchoolName, address _schoolAddress) external returns (bool createStatus);
 }
 
 contract CredentialFactory is Pausable{
     
+    // SafeMath32 library.
     using SafeMath32 for uint32;
-    // events
+    
+    // event
     event CredentialFactoryActivity(address credentialOrg, string credentialTitle, string detail);
 
     // mapping
@@ -28,11 +32,14 @@ contract CredentialFactory is Pausable{
         string credentialDivision;  // 50 or less string
         uint32 credentialInsertDate;// Credential Insert timestamp
     }
-    address private credentialOrgContractAddress;
     
-    // constructor
+    // address to allow communication with CredentialOrgFactory.
+    address private credentialOrgContractAddress;
+
+    /**
+    * @dev constructor
+    */
     constructor () public {
-        createCredential("TESTREC", "AAAA", "AAAAAA");
     }
 
     // functions
@@ -46,8 +53,9 @@ contract CredentialFactory is Pausable{
     {
         returnedOwner = owner;
     }
+
     /**
-    * @dev allows credentialing Orgs to create new credentials
+    * @dev setting allows communication between CredentialFactory and CredentialOrgFactory
     * @param _credentialOrgContractAddress Address of CredentialOrgFactory Contract.
     */
     function setAddress(address _credentialOrgContractAddress) public onlyOwner {
@@ -102,7 +110,7 @@ contract CredentialFactory is Pausable{
     }
 
     /**
-    * @dev allows checking of CredentialCount
+    * @dev allows checking of CredentialCount of a CredentialOrg
     * @param _credentialOrgAddress Address of Credential Org
     * @return returnCredentialCount - returns count of credentials of org.
     */

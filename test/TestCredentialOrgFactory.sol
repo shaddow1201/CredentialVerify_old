@@ -1,14 +1,20 @@
 pragma solidity ^0.4.21;
-
+/**
+ * @title TestCredentialOrgFactory
+ * @dev The TestCredentialOrgFactory contracts allows for CredentialOrgFactory  to be tested.
+ */
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/CredentialOrgFactory.sol";
 
 contract TestCredentialOrgFactory {
+    // deployed instance for all non onlyOwner testing.
     CredentialOrgFactory credentialOrgFactoryA = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
+    // local instance for onlyOwner testing.
     CredentialOrgFactory credentialOrgFactoryB = new CredentialOrgFactory();
+
     /**
-    * @dev Checks Owner address vs expected
+    * @dev Checks Owner address vs expected, Makes sure that the contract was deployed to the correct owner.
     */
     function testCheckContractOwner() public {
 
@@ -19,18 +25,18 @@ contract TestCredentialOrgFactory {
     }
 
     /**
-    * @dev Tests to see if INIT record was created upon deploy.
+    * @dev Tests to see if INIT record was created upon deploy.  Data existence check.
     */
     function testSelectCredentialOrgCount() public {
 
         uint256 orgCount = uint256(credentialOrgFactoryA.selectOrgCount());
-        uint256 expected = 1;
+        uint256 expected = 5;
 
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
 
     /**
-    * @dev Tests to see if INIT record values were set correctly.
+    * @dev Tests to see if INIT record values were set correctly.  Data Value correctness checking.
     */
     function testSelectCredentialOrgTestRecord() public {
 
@@ -57,6 +63,7 @@ contract TestCredentialOrgFactory {
 
     /*
     * @dev Test to see newly inserted credentialing ord data was set correctly.
+    *  local instance invoked to allow onlyOwner modifer to work.
     */
     function testSelectCredentialOrgDataOnNewInsert() public {
 
@@ -68,11 +75,13 @@ contract TestCredentialOrgFactory {
     }
 
     /**
-    * @dev Tests to see if INIT record was created upon deploy.
+    * @dev Tests to see if count increased after insert.
+    *  local instance invoked to allow onlyOwner modifer to work.
     */
     function testSelectCredentialOrgCountAfterInsert() public {
 
         uint256 orgCount = uint256(credentialOrgFactoryB.selectOrgCount());
+        // local instance so original should be zero before the insert.
         uint256 expected = 1;
 
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
@@ -95,16 +104,16 @@ contract TestCredentialOrgFactory {
     /*
     * @dev Test to see if invalid credentialling org address IS a credentialling org (should return false)
     */
-    function testisCredentialOrgInValid() public {
+    function testIsCredentialOrgInValid() public {
 
         bool testVal = credentialOrgFactoryA.isCredentialOrg(0x1eC2c24e0110a0c0C4e0E03e694dBC95cd825162);
         Assert.isFalse(testVal, "Base Inserted Test Org Valid");
     }
 
     /*
-    * @dev Test to see if credentialling org can be looked up by address
+    * @dev Test to see if credentialling org can be looked up by valid credentialling org address
     */
-    function testselectValidCredentialOrgByAddress() public {
+    function testSelectValidCredentialOrgByAddress() public {
 
         string memory shortName;
         (shortName , , ) = credentialOrgFactoryB.selectCredentialOrgByAddress(0x459c758575A93727fbfE16C4B8A9934Cd8Ab092C);
@@ -112,4 +121,17 @@ contract TestCredentialOrgFactory {
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
     }
+
+    /*
+    * @dev Test to see if invalid credentialling org can be looked up by address (blank means no return values)
+    */
+    function testSelectInvalidCredentialOrgByAddress() public {
+
+        string memory shortName;
+        (shortName , , ) = credentialOrgFactoryB.selectCredentialOrgByAddress(0xdCE6985d5C79B1B9AE30D748C1834Ab18AbE0C56);
+        string memory expected = "";
+
+        Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName. (blank)");
+    }
+
 }

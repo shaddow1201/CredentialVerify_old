@@ -6,15 +6,19 @@ pragma solidity ^0.4.21;
 import "./Pausable.sol";
 import "./SafeMath32.sol";
 
+// Allows interface between Process Credentials and CredentialOrgFactory.
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
 }
 
+// Allows interface between Process Credentials and CredentialFactory.
 interface CredentialFactory{
+    function selectOrgCredentialCount(address _credentialOrgAddress) external view returns (uint32 returnCredentialCount);
     function selectCredential(address _credentialOrgAddress, uint32 _position) external view returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive);
     function isCredentialActive(address _credentialOrgAddress, uint _position) external view returns (bool activeState);
 }
 
+// Allows interface between Process Credentials and ApplicantFactory.
 interface ApplicantFactory{
     function selectApplicantByOrgAndPosition(address _orgAddress, uint32 _position) external view returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName);
     function updateApplicantByOrgAndPosition(uint32 _position, string _processDetail) external returns (bool updateSuccess);
@@ -22,15 +26,13 @@ interface ApplicantFactory{
 }
 
 contract ProcessApplicants is Pausable {
-    /**
-    *  @dev Library useage for safemath for uint32
-    */
+    // SafeMath32 Library
     using SafeMath32 for uint32;
+
     // mappings
     mapping (address => ApplicantCredential[]) credentialOrgToApplicantCredential;
     mapping (address => uint32) credentialOrgToApplicantCredentials;
     mapping (address => uint32) credentailOrgToApplicantPosition;
-
 
     // events
     event ProcessCredentialApplicant(address orgAddress, address ApplicantAddress, uint32 position, string detail);
@@ -94,22 +96,17 @@ contract ProcessApplicants is Pausable {
     * @param _position address of CredentialOrgFactory (set on deploy).
     */
     function setCredentialOrgApplicantPosition (uint32 _position)
-    public onlyBy(msg.sender)
+    public 
     {
         require(_position >= 0,"setCredentialOrgApplicantPosition (FAIL) Position must be 0 or greater.");
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgFactoryAddress);
-        if (cof.isCredentialOrg(msg.sender)){
-            credentailOrgToApplicantPosition[msg.sender] = _position;
-            emit ProcessCredentialDetail (msg.sender, "setCredentialOrgApplicantPosition (SUCCESS)");
-        } else {
-            emit ProcessCredentialDetail (msg.sender, "setCredentialOrgApplicantPosition (FAIL) Not Credential Org");
-        }
+        credentailOrgToApplicantPosition[msg.sender] = _position;
+        emit ProcessCredentialDetail (msg.sender, "setCredentialOrgApplicantPosition (SUCCESS)");
     }
     /**
     * @dev Allows credentialOrg to select next Applicant (or sends back blank of not available/error)
     */
     function selectCredentialOrgNextApplicant()
-    public view onlyBy(msg.sender)
+    public view
     returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName, uint32 insertDate)
     {
         ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
@@ -127,14 +124,16 @@ contract ProcessApplicants is Pausable {
     }
 
     function createApplicantCredential(uint32 _credentialPosition)
-    public onlyBy(msg.sender)
+    public 
     returns (bool insertSuccess)
     {
+        require(msg.sender != 0, "createApplicantCredential (FAIL), msg.sender can't be 0");
+        CredentialFactory cf = CredentialFactory(credentialFactoryAddress);
+        require(_credentialPosition >= 0 && cf.selectOrgCredentialCount(msg.sender) <= _credentialPosition, "createApplicantCredential (FAIL), credential problem, likley greater than max");
         insertSuccess = false;
         bool insertStatus = false;
         ApplicantCredential memory appCredential;
         ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
-        CredentialFactory cf = CredentialFactory(credentialFactoryAddress);
         (appCredential.applicant, , , appCredential.firstName, appCredential.lastName) = af.selectApplicantByOrgAndPosition(msg.sender, credentailOrgToApplicantPosition[msg.sender]);
         (appCredential.credentialLevel, appCredential.credentialTitle, appCredential.credentialDivision, , ) = cf.selectCredential(msg.sender, _credentialPosition);
         uint32 position = uint32(credentialOrgToApplicantCredential[msg.sender].push(appCredential));

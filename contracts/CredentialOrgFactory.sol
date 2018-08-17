@@ -8,40 +8,28 @@ import "./Pausable.sol";
 import "./SafeMath32.sol";
 
 contract CredentialOrgFactory is Pausable {
-
-    /**
-    *  @dev Library useage for safemath for uint32
-    */
+    // SafeMath32 library usage.
     using SafeMath32 for uint32;
 
-    /**
-    * @dev mappings
-    */
+    // mappings
     mapping(address => CredentialOrg) addressToCredentialOrg;
     
-    /**
-    * @dev events for contract
-    * One for the create CredentialOrg and one for the basic 'logging'.
-    */
+    // events 
     event CredentialOrgCreateEvent(string shortName, address schoolAddress, string detail);
     event CredentialOrgEvent(address schoolAddress, string detail);
 
-    /**
-    * @dev CredentialOrg Count
-    */
+    // # of credentialling orgs created.
     uint32 private credentialOrgCount;
 
-    /**
-    * @dev Primary CredentialOrg structure, and following array.
-    */
+    // Primary CredentialOrg structure, and following array.
     struct CredentialOrg {
         string shortName;          // School shortName (len 30)
         string officialSchoolName; // official school shortName (70 or less)
         address schoolAddress;
     }
-    
-    CredentialOrg[] private credentialOrgs; // array to hold Credentialing Orgs
-    address private contractCheckAddress;
+    // CredentialOrg Array    
+    CredentialOrg[] private credentialOrgs; 
+
     /**
     * @dev class constructor
     */
@@ -69,7 +57,7 @@ contract CredentialOrgFactory is Pausable {
     * @return createStatus bool noting creation status success or failure
     */
     function createCredentialOrg(string _shortName, string _officialSchoolName, address _schoolAddress) 
-    public
+    public onlyOwner
     returns (bool createStatus)
     {
         emit CredentialOrgCreateEvent(_shortName, _schoolAddress, "New Org Add (PRE)");
