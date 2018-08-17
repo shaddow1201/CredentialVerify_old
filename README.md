@@ -1,22 +1,23 @@
 # Credential Verify
 
-Credential Verify is intended to be an off-chain enterprise solution pointed at verifying Educational Institutions awarded credentials cryptographically.
+Credential Verify is intended to be an off-chain enterprise solution pointed at cryptographically verifying Educational Institutions awarded credentials.  This is round of of probably 3 before completed.
 
 ## What it does
-1. allows the creation of CredentialOrgs (CredentialOrgFactory.sol)
-2. allows those CredentialOrgs to create Credentials for themselves (CredentialFactory.sol)
-3. allows Applicants to apply to credentiallying orgs for Credentials (ApplicantFactory.sol)
-4. allows CredentialOrgs to to take and apply credentials to Applicants (ProcessApplicants.sol)
+1. CredentialOrgFactory.sol - allows the creation of CredentialOrgs.
+2. CredentialFactory.sol - allows creation of credentials.
+3. ApplicantFactory.sol - allows Applicants to apply to CredentialOrgs for Awarded Credentials
+4. ProcessApplicants.sol - allows CredentialOrgs to apply Credentials to Applicants.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions should allow a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
 1. Truffle install - https://github.com/trufflesuite/truffle
 2. ganache-cli install - https://github.com/trufflesuite/ganache-cli
 3. project files (this git collection)
+4. MetaMask install - https://metamask.io/
 
 ### Installing
 
@@ -27,45 +28,40 @@ These instructions will get you a copy of the project up and running on your loc
 ganache-cli -port 8545 -m "delay film punch stool adult expect bulb grab clinic lawsuit clown amused"
 ```
 
+3. Set Up MetaMask for project -
+    import with seed phrase "delay film punch stool adult expect bulb grab clinic lawsuit clown amused"
+    (set your own password, this is a throw away for testing)
+
+    change the network to Private Network, set port to: 8545
+
 3. Compile truffle
+Compile the project in standard manner from where the file was unzipped.
 
 ```
 truffle compile
 ```
 
 3. Migrate
-
+Migrate the project to the blockchain.
 ```
 truffle migrate
 ```
 
-## Tests
+4. Tests
+A series of solidity tests for the contract files, testing basic contract functionality.
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+Round 2 will include access control tightening through the use of modifiers, and javascript testing.
 
 ```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
+truffle test
 ```
 
 ## Built With
 
 * [Truffle Suite](https://truffleframework.com) - Truffle Suite Framework.
 * [ganache-cli](https://github.com/trufflesuite/ganache-cli) - Ganache-cli (command line)
-* [truffle react box]() - used as base
+* [truffle react box]() - used as web app base.
 
 ## Authors
-
-* **Richard Noordam ** 
+Richard Noordam
 
