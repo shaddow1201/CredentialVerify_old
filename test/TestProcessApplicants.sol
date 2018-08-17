@@ -20,5 +20,4 @@ contract TestProcessApplicants {
         Assert.equal(contractOwner, expected, "Check Owner");
     }
 
-
 }

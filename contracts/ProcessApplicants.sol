@@ -1,7 +1,8 @@
 pragma solidity ^0.4.21;
 /**
  * @title ProcessCredentials
- * @dev The ProcessCredentials contracts allows credentialing orgs to assign credentials to an Applicant.
+ * @dev The ProcessCredentials contracts allows gathering of all the information between 
+ *      CredentialOrgFactory, CredentialFactory, ApplicantFactory.
  */
 import "./Pausable.sol";
 import "./SafeMath32.sol";
@@ -14,14 +15,16 @@ interface CredentialOrgFactory{
 
 // Allows interface between Process Credentials and CredentialFactory.
 interface CredentialFactory{
-    function selectOrgCredentialCount(address _credentialOrgAddress) external view returns (uint32 returnCredentialCount);
-    function selectCredential(address _credentialOrgAddress, uint32 _position) external view returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive);
+    function selectCredential(address _credentialOrgAddress, uint32 _position) 
+    external view 
+    returns (string credentialLevel, string credentialTitle, string credentialDivision, uint32 credentialInsertDate, bool isActive);
 }
 
 // Allows interface between Process Credentials and ApplicantFactory.
 interface ApplicantFactory{
-    function selectApplicantByOrgAndPosition(address _orgAddress, uint32 _position) external view returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName);
-    function updateApplicantByOrgAndPosition(uint32 _position, string _processDetail) external returns (bool updateSuccess);
+    function selectApplicantByOrgAndPosition(address _orgAddress, uint32 _position) 
+    external view 
+    returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName);
     function selectOrgApplicantCount(address _orgAddress) external view returns (uint32 appCount);
 }
 
@@ -30,27 +33,11 @@ contract ProcessApplicants is Pausable {
     using SafeMath32 for uint32;
 
     // mappings
-    mapping (address => ApplicantCredential[]) credentialOrgToApplicantCredential;
-    mapping (address => uint32) credentialOrgToApplicantCredentials;
     mapping (address => uint32) credentailOrgToApplicantPosition;
 
     // events
     event ProcessCredentialApplicant(address orgAddress, address ApplicantAddress, uint32 position, string detail);
     event ProcessCredentialDetail(address orgAddress,string detail);
-
-    // structs
-    struct ApplicantCredential {
-        // addresses
-        address credentialOrg;
-        address applicant;
-        // student detail
-        string firstName;          // first name lenmax 40
-        string lastName;           // last name  lenmax 40
-        // credential details
-        string credentialLevel;     // 50 or less string
-        string credentialTitle;     // 70 or less string
-        string credentialDivision;  // 50 or less string
-    }
 
     // variables
     address private credentialOrgFactoryAddress;
@@ -63,16 +50,23 @@ contract ProcessApplicants is Pausable {
     */
     modifier onlyBy(address _credentialOrgAddress){
         uint32 foundAccount = 0;
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgFactoryAddress);
         if (cof.isCredentialOrg(msg.sender)){
             foundAccount = 1;
         }
         if (foundAccount == 0) revert("Not Authorized CredentialOrg");
         _;
     }
+    // References for the other contracts
+    ApplicantFactory af;
+    CredentialFactory cf;
+    CredentialOrgFactory cof;
+
 
     // constructor
     constructor () public {
+        af = ApplicantFactory(applicantFatoryAddress);
+        cf = CredentialFactory(credentialFactoryAddress);
+        cof = CredentialOrgFactory(credentialOrgFactoryAddress);
     }
 
     // functions
@@ -104,13 +98,26 @@ contract ProcessApplicants is Pausable {
     }    
 
     /**
+    * @dev Allows resetting of Applicant Position lookup.
+    * @param _position positon at which to start processing.
+    */
+    function updateApplicantProcessingPosition(uint32 _position)
+    public
+    {
+        // since we only work on own data, reprocessing isn't an issue.  
+        // Do want to relook at this. will probably want to limit this
+        // to just a few backwards.   maybe just minus 1.
+        require(_position >= 0, "updateApplicantProcessingPosition: (FAIL) position has to be 0 or greater");
+        credentailOrgToApplicantPosition[msg.sender] = _position;
+    }
+
+    /**
     * @dev Allows credentialOrg to select next Applicant (or sends back blank of not available/error)
     */
     function selectCredentialOrgNextApplicant()
     public view
     returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName, uint32 insertDate)
     {
-        ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
         if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
             (studentAddress, SSN, collegeStudentID, firstName, lastName) = af.selectApplicantByOrgAndPosition(msg.sender, credentailOrgToApplicantPosition[msg.sender]);
         } else {
@@ -125,53 +132,38 @@ contract ProcessApplicants is Pausable {
     }
 
     /**
-    * @dev allows the creation of an applicantCredential
+    * @dev allows the selection of an applicantCredential
+    * @param _credentialOrg credentialOrg address
     * @param _credentialPosition position of credential in CredentialOrgs Credentials
-    * @return insertSuccess true/false 
+    * @return credentialLevel the credential level 
+    * @return credentialTitle the credential title
+    * @return credentialDivision the credential Division
     */
-    function createApplicantCredential(uint32 _credentialPosition)
-    public 
-    returns (bool insertSuccess)
+    function selectCredentialbyOrgAndPosition(address _credentialOrg, uint32 _credentialPosition)
+    public view
+    returns (string credentialLevel, string credentialTitle, string credentialDivision)
     {
-        require(msg.sender != 0, "createApplicantCredential (FAIL), msg.sender can't be 0");
-        CredentialFactory cf = CredentialFactory(credentialFactoryAddress);
-        require(_credentialPosition >= 0 && cf.selectOrgCredentialCount(msg.sender) <= _credentialPosition, "createApplicantCredential (FAIL), credential problem, likley greater than max");
-        insertSuccess = false;
-        bool insertStatus = false;
-        ApplicantCredential memory appCredential;
-        ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
-        (appCredential.applicant, , , appCredential.firstName, appCredential.lastName) = af.selectApplicantByOrgAndPosition(msg.sender, credentailOrgToApplicantPosition[msg.sender]);
-        (appCredential.credentialLevel, appCredential.credentialTitle, appCredential.credentialDivision, , ) = cf.selectCredential(msg.sender, _credentialPosition);
-        uint32 position = uint32(credentialOrgToApplicantCredential[msg.sender].push(appCredential));
-        if (position > 0){
-            insertStatus = true;
-        }
-        af = ApplicantFactory(applicantFatoryAddress);
-        bool updateStatus = false;
-        if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
-            updateStatus = af.updateApplicantByOrgAndPosition(credentailOrgToApplicantPosition[msg.sender], "AWARDED");
-        } else {
-            updateStatus = false;
-            emit ProcessCredentialDetail (msg.sender, "createApplicantCredential (FAIL) failure.");
-        }
-        return (insertSuccess);
+        (credentialLevel, credentialTitle, credentialDivision, , ) = cf.selectCredential(_credentialOrg, _credentialPosition);
+
+        return (credentialLevel, credentialTitle, credentialDivision);
     }
 
     /**
-    * @dev allows credentialOrg to deny applicant.
-    * @return true/false on update
+    * @dev allows the selection of an applicantCredential
+    * @param _credentialOrg credentialOrg address
+    * @return applicant the applicant address
+    * @return firstName the applicant First Name
+    * @return lastName the applicant lastName
     */
-    function denyApplicantCredential()
-    public
-    returns (bool updateStatus)
+    function selectApplicantbyOrg(address _credentialOrg)
+    public view
+    returns (address applicant, string SSN, string collegeStudentID, string firstName, string lastName)
     {
-        ApplicantFactory af = ApplicantFactory(applicantFatoryAddress);
-        if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){
-            updateStatus = af.updateApplicantByOrgAndPosition(credentailOrgToApplicantPosition[msg.sender], "DENIED");
-        } else {
-            updateStatus = false;
-            emit ProcessCredentialDetail (msg.sender, "denyApplicantCredential (FAIL) credentialOrgToApplicantPosition failure.");
-        }
-        return (updateStatus);
+        (applicant, SSN, collegeStudentID, firstName, lastName) = af.selectApplicantByOrgAndPosition(_credentialOrg, credentailOrgToApplicantPosition[_credentialOrg]);
+        return (applicant, SSN, collegeStudentID, firstName, lastName);
     }
+
+
+
+
 }
