@@ -5,14 +5,14 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/CredentialOrgFactory.sol";
 
 contract TestCredentialOrgFactory {
-    CredentialOrgFactory credentialOrgFactory = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
-
+    CredentialOrgFactory credentialOrgFactoryA = CredentialOrgFactory(DeployedAddresses.CredentialOrgFactory());
+    CredentialOrgFactory credentialOrgFactoryB = new CredentialOrgFactory();
     /**
     * @dev Checks Owner address vs expected
     */
     function testCheckContractOwner() public {
 
-        address contractOwner = credentialOrgFactory.getOwner();
+        address contractOwner = credentialOrgFactoryA.getOwner();
         address expected = 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB;
 
         Assert.equal(contractOwner, expected, "Check Owner");
@@ -23,8 +23,8 @@ contract TestCredentialOrgFactory {
     */
     function testSelectCredentialOrgCount() public {
 
-        uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
-        uint256 expected = 1;
+        uint256 orgCount = uint256(credentialOrgFactoryA.selectOrgCount());
+        uint256 expected = 2;
 
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
@@ -35,7 +35,7 @@ contract TestCredentialOrgFactory {
     function testSelectCredentialOrgTestRecord() public {
 
         string memory shortName;
-        (shortName, , ) = credentialOrgFactory.selectCredentialOrgByPosition(0);
+        (shortName, , ) = credentialOrgFactoryA.selectCredentialOrgByPosition(0);
         string memory expected = "INITRECORD";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
@@ -50,7 +50,7 @@ contract TestCredentialOrgFactory {
         string memory shortName = "TESTREC";
         string memory officialSchoolName = "TESTREC";
         address schoolAddress = 0x459c758575A93727fbfE16C4B8A9934Cd8Ab092C;
-        testVal = credentialOrgFactory.createCredentialOrg(shortName, officialSchoolName, schoolAddress);
+        testVal = credentialOrgFactoryB.createCredentialOrg(shortName, officialSchoolName, schoolAddress);
         
         Assert.isTrue(testVal, "Insert of CredentialOrg Test Successful");
     }
@@ -61,7 +61,7 @@ contract TestCredentialOrgFactory {
     function testSelectCredentialOrgDataOnNewInsert() public {
 
         string memory shortName;
-        (shortName, , ) = credentialOrgFactory.selectCredentialOrgByPosition(1);
+        (shortName, , ) = credentialOrgFactoryB.selectCredentialOrgByPosition(0);
         string memory expected = "TESTREC";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
@@ -72,8 +72,8 @@ contract TestCredentialOrgFactory {
     */
     function testSelectCredentialOrgCountAfterInsert() public {
 
-        uint256 orgCount = uint256(credentialOrgFactory.selectOrgCount());
-        uint256 expected = 2;
+        uint256 orgCount = uint256(credentialOrgFactoryB.selectOrgCount());
+        uint256 expected = 1;
 
         Assert.equal(orgCount, expected, "Select of CredentialOrg Count.");
     }
@@ -85,7 +85,7 @@ contract TestCredentialOrgFactory {
     function testSelectCredentialOrgInvalidPosition() public {
 
         string memory shortName;
-        (shortName, , ) = credentialOrgFactory.selectCredentialOrgByPosition(10);
+        (shortName, , ) = credentialOrgFactoryA.selectCredentialOrgByPosition(10);
         string memory expected = "";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");
@@ -97,7 +97,7 @@ contract TestCredentialOrgFactory {
     */
     function testisCredentialOrgInValid() public {
 
-        bool testVal = credentialOrgFactory.isCredentialOrg(0x1eC2c24e0110a0c0C4e0E03e694dBC95cd825162);
+        bool testVal = credentialOrgFactoryA.isCredentialOrg(0x1eC2c24e0110a0c0C4e0E03e694dBC95cd825162);
         Assert.isFalse(testVal, "Base Inserted Test Org Valid");
     }
 
@@ -107,7 +107,7 @@ contract TestCredentialOrgFactory {
     function testselectValidCredentialOrgByAddress() public {
 
         string memory shortName;
-        (shortName , , ) = credentialOrgFactory.selectCredentialOrgByAddress(0x459c758575A93727fbfE16C4B8A9934Cd8Ab092C);
+        (shortName , , ) = credentialOrgFactoryB.selectCredentialOrgByAddress(0x459c758575A93727fbfE16C4B8A9934Cd8Ab092C);
         string memory expected = "TESTREC";
 
         Assert.equal(shortName, expected, "Retreival of CredentialOrg shortName.");

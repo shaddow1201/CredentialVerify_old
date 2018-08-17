@@ -31,31 +31,19 @@ contract CredentialFactory is Pausable{
     
     // constructor
     constructor () public {
-        createCredential("TESTREC", "AAAA", "AAAAAA");
-    }
-
-    // modifiers
-    /**
-    * @dev Modifer onlyBy for Access Control
-    */
-    modifier onlyBy(address _credentialOrgAddress){
-        uint32 foundAccount = 0;
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (cof.isCredentialOrg(_credentialOrgAddress)){
-            foundAccount = 1;
-        }
-        require(foundAccount == 1, "Not Credentialing Org");
-        _;
     }
 
     // functions
+    /**
+    * @dev get the owner of the contract
+    * @return returns owner address
+    */
     function getOwner()
     public view
     returns (address returnedOwner)
     {
         returnedOwner = owner;
     }
-
     /**
     * @dev allows credentialing Orgs to create new credentials
     * @param _credentialOrgContractAddress Address of CredentialOrgFactory Contract.
@@ -77,23 +65,22 @@ contract CredentialFactory is Pausable{
     {
         emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (ATTEMPT)");
         insertStatus = false;
-
         require(bytes(_credentialLevel).length > 0 && bytes(_credentialLevel).length < 50, "createCredential - Level length problem");
         require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
         require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
-        //CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        //if (cof.isCredentialOrg(msg.sender)){
-        uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp))));
-        if(position > 0){
-            insertStatus = true;
-            orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
-            emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
+        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
+        if (cof.isCredentialOrg(msg.sender)){
+            uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp))));
+            if(position > 0){
+                insertStatus = true;
+                orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
+                emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
+            } else {
+                emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
+            }
         } else {
             emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
         }
-        //} else {
-        //    emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
-        //}
     }
 
     /**
@@ -109,16 +96,10 @@ contract CredentialFactory is Pausable{
     returns (string credentialLevel, string credentialTitle, string credentialDivision)
     {
         require(_position >= 0, "selectCredential (FAIL) position incorrect");
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (cof.isCredentialOrg(_credentialOrgAddress)){
-            if (_position < orgAddressToCredentialTotalCount[_credentialOrgAddress]){
-                return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision);    
-            } else {
-                emit CredentialFactoryActivity(_credentialOrgAddress, "", "selectCredential: Credential Bounds Error");
-                return ("","","");
-            }
+        if (_position < orgAddressToCredentialTotalCount[_credentialOrgAddress]){
+            return (orgAddressToCredentials[_credentialOrgAddress][_position].credentialLevel,orgAddressToCredentials[_credentialOrgAddress][_position].credentialTitle, orgAddressToCredentials[_credentialOrgAddress][_position].credentialDivision);    
         } else {
-            emit CredentialFactoryActivity(_credentialOrgAddress, "", "selectCredential: Not Credential Org");
+            emit CredentialFactoryActivity(_credentialOrgAddress, "", "selectCredential: Credential Bounds Error");
             return ("","","");
         }
     }

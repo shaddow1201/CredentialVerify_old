@@ -41,23 +41,26 @@ contract CredentialOrgFactory is Pausable {
     }
     
     CredentialOrg[] private credentialOrgs; // array to hold Credentialing Orgs
-
+    address private contractCheckAddress;
     /**
     * @dev class constructor
     */
     constructor() public {
         credentialOrgCount = 0;
-        createCredentialOrg("INITRECORD", "BASE INIT RECORD", owner);
     }
     
     // functions
+    /**
+    * @dev gets owners address
+    * @return returns contractOwners Address
+    */
     function getOwner()
     public view
     returns (address returnedOwner)
     {
         returnedOwner = owner;
+        return(returnedOwner);
     }
-
     /**
     * @dev allows owner to create new credentialing orgs
     * @param _shortName shortName of Credentialing orgs
@@ -124,10 +127,10 @@ contract CredentialOrgFactory is Pausable {
         require(_credentialOrgAddress != 0, "selectCredentialOrg - Address 0 not valid");
         CredentialOrg memory testCred = addressToCredentialOrg[_credentialOrgAddress];
         if (testCred.schoolAddress != 0){
-            emit CredentialOrgEvent(msg.sender, "selectCredentialOrg~address - (SUCCESS)");
+            emit CredentialOrgEvent(_credentialOrgAddress, "selectCredentialOrg~address - (SUCCESS)");
             return (testCred.shortName, testCred.officialSchoolName, testCred.schoolAddress);
         } else {
-            emit CredentialOrgEvent(msg.sender, "selectCredentialOrg~address - (FAIL)");
+            emit CredentialOrgEvent(_credentialOrgAddress, "selectCredentialOrg~address - (FAIL)");
             return ("", "", 0);
         }
     }
@@ -145,9 +148,9 @@ contract CredentialOrgFactory is Pausable {
         CredentialOrg memory testCredentialOrg = addressToCredentialOrg[_credentialOrgAddress];
         if (testCredentialOrg.schoolAddress != 0){
             isOrgAddress = true;
-            emit CredentialOrgEvent(msg.sender, "isCredentialOrg - (SUCCESS)");
+            emit CredentialOrgEvent(_credentialOrgAddress, "isCredentialOrg - (SUCCESS)");
         } else {
-            emit CredentialOrgEvent(msg.sender, "isCredentialOrg - (FAIL)");
+            emit CredentialOrgEvent(_credentialOrgAddress, "isCredentialOrg - (FAIL)");
         }
         return (isOrgAddress);
     }
