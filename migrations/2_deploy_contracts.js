@@ -30,10 +30,11 @@ var CredentialFactory = artifacts.require("CredentialFactory");
     results = await Promise.all([
       aInst.createCredentialOrg("INITRECORD", "BASE INIT RECORD", 0x5a186B7FeC36909678211F69beB67EC3b1E4fFBB),
       bInst.setAddress(aInst.address),
-      bInst.createCredential("TESTREC", "AAAA", "AAAAAA"),
-      aInst.createCredentialOrg("CREDENTIAL", "CREDENTIAL CONTRACT",bInst.address)
+      console.log(aInst.address),
+      aInst.createCredentialOrg("CREDENTIAL", "CREDENTIAL CONTRACT", bInst.address),
+      //bInst.createCredential("TESTREC", "AAAA", "AAAAAA")
       //cInst.setAddress(aInst.address),
       //dInst.setAddress(aInst.address, bInst.address, cInst.address)
     ]);
-  
+
   };

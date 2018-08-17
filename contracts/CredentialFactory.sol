@@ -7,6 +7,7 @@ import "./SafeMath32.sol";
  */
 interface CredentialOrgFactory{
     function isCredentialOrg(address _credentialOrgAddress) external view returns (bool IsOrgAddress);
+    function createCredentialOrg(string _shortName, string _officialSchoolName, address _schoolAddress) external returns (bool createStatus);
 }
 
 contract CredentialFactory is Pausable{
@@ -31,6 +32,7 @@ contract CredentialFactory is Pausable{
     
     // constructor
     constructor () public {
+        createCredential("TESTREC", "AAAA", "AAAAAA");
     }
 
     // functions
@@ -68,16 +70,11 @@ contract CredentialFactory is Pausable{
         require(bytes(_credentialLevel).length > 0 && bytes(_credentialLevel).length < 50, "createCredential - Level length problem");
         require(bytes(_credentialTitle).length > 0 && bytes(_credentialTitle).length < 70, "createCredential - Title length problem");
         require(bytes(_credentialDivision).length >= 0 && bytes(_credentialDivision).length < 50, "createCredential - Division length problem");
-        CredentialOrgFactory cof = CredentialOrgFactory(credentialOrgContractAddress);
-        if (cof.isCredentialOrg(msg.sender)){
-            uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp))));
-            if(position > 0){
-                insertStatus = true;
-                orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
-                emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
-            } else {
-                emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
-            }
+        uint32 position = uint32(orgAddressToCredentials[msg.sender].push(Credential(msg.sender, _credentialLevel, _credentialTitle, _credentialDivision, uint32(block.timestamp))));
+        if(position > 0){
+            insertStatus = true;
+            orgAddressToCredentialTotalCount[msg.sender] = orgAddressToCredentialTotalCount[msg.sender].add(1);
+            emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (SUCCCESS)");
         } else {
             emit CredentialFactoryActivity(msg.sender, _credentialTitle, "New Credential Add (FAILED)");
         }

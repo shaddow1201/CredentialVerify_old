@@ -21,7 +21,8 @@ contract TestCredentialFactory {
     }
 
     function testSelectValidOrgCredentialCount() public {
-        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(account0));
+        address contractOwner = credentialFactory.getOwner();
+        uint256 testVal = uint256(credentialFactory.selectOrgCredentialCount(contractOwner));
         uint256 expected = 1;
         Assert.equal(testVal, expected, "Expected Credential Count (1)");
     }
@@ -40,6 +41,21 @@ contract TestCredentialFactory {
         string memory expected = "TESTREC";
 
         Assert.equal(credentialLevel,expected,"Credential Division Matches Expected (TESTREC)");
+    }
+
+    function testInsertCredentialRecord() public {
+        bool insertSuccess = credentialFactory.createCredential("ANOTHERREC", "AAAA", "AAAAAA");
+
+        Assert.isTrue(insertSuccess, "Credential Record Creation Test Expected (True)");
 
     }
+    function testSelectCredentialInsertedRecord() public {
+        string memory credentialLevel;
+
+        (credentialLevel, , ) = credentialFactory.selectCredential(address(this), 0);
+        string memory expected = "ANOTHERREC";
+
+        Assert.equal(credentialLevel,expected,"Credential Division Matches Expected (ANOTHERREC)");
+    }
+
 }
