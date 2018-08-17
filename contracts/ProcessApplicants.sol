@@ -115,7 +115,7 @@ contract ProcessApplicants is Pausable {
     * @dev Allows credentialOrg to select next Applicant (or sends back blank of not available/error)
     */
     function selectCredentialOrgNextApplicant()
-    public view
+    public
     returns (address studentAddress, string SSN, string collegeStudentID, string firstName,  string lastName, uint32 insertDate)
     {
         if (af.selectOrgApplicantCount(msg.sender) >= credentailOrgToApplicantPosition[msg.sender]){

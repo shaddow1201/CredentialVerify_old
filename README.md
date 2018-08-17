@@ -6,7 +6,7 @@ Credential Verify is intended to be an off-chain enterprise solution pointed at 
 1. CredentialOrgFactory.sol - allows the creation of CredentialOrgs.
 2. CredentialFactory.sol - allows creation of credentials.
 3. ApplicantFactory.sol - allows Applicants to apply to CredentialOrgs for Awarded Credentials
-4. ProcessApplicants.sol - allows CredentialOrgs to apply Credentials to Applicants.
+4. ProcessApplicants.sol - allows Gathering of info from CredentialOrgFactory, CredentialFactory, and Applicant Factory.
 
 ## Getting Started
 

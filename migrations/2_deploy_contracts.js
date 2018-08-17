@@ -10,7 +10,7 @@ var ProcessApplicants = artifacts.require("ProcessApplicants");
       deployer.deploy(CredentialOrgFactory),
       deployer.deploy(CredentialFactory),
       deployer.deploy(ApplicantFactory),
-      deployer.deploy(ProcessApplicants),
+      deployer.deploy(ProcessApplicants, {gas: 4000000})
     ]);
   
     instances = await Promise.all([
