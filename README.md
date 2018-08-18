@@ -7,6 +7,7 @@ Credential Verify is intended to be an off-chain enterprise solution pointed at 
 2. CredentialFactory.sol - allows creation of credentials.
 3. ApplicantFactory.sol - allows Applicants to apply to CredentialOrgs for Awarded Credentials
 4. ProcessApplicants.sol - allows Gathering of info from CredentialOrgFactory, CredentialFactory, and Applicant Factory.
+5. CredentialWriteOrDenyApplicant.sol - to be impliments in future
 
 ## Getting Started
 
@@ -61,6 +62,8 @@ truffle test
 * [Truffle Suite](https://truffleframework.com) - Truffle Suite Framework.
 * [ganache-cli](https://github.com/trufflesuite/ganache-cli) - Ganache-cli (command line)
 * [truffle react box]() - used as web app base.
+* [OpenZeppelin-Solidity](https://github.com/OpenZeppelin/openzeppelin-solidity) (Pausable.sol, Ownable.sol)
+* [CryptoZombies](http://cryptozombies.io) (SafeMath32.sol)
 
 ## Authors
 Richard Noordam

@@ -102,6 +102,7 @@ contract ApplicantFactory is Pausable {
         require(bytes(_collegeStudentID).length == 9, "createApplicant (FAIL)College StudentID length Problem");
         require(bytes(_firstName).length > 0 && bytes(_firstName).length <= 40, "createApplicant (FAIL) FirstName length problem"); 
         require(bytes(_lastName).length > 0 && bytes(_lastName).length <= 40, "createApplicant (FAIL) LastName length problem"); 
+        //require(applicantAddressToApplicantPosition[msg.sender] > 0 || msg.sender == owner, "createApplicant (FAIL) only one application per address");
         insertSuccess = false;
         uint32 position = uint32(orgAddressToApplicants[_collegeAddress].push(Applicant(msg.sender, _SSN, _collegeStudentID, _firstName, _lastName, uint32(block.timestamp), 0, "")));
         if(position >= 0){
